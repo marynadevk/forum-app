@@ -1,0 +1,27 @@
+{
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "^react$",
+    "^react-router-dom$",
+    "^react-hook-form$",
+    "^[a-z]",
+    "<THIRD_PARTY_MODULES>",
+    "^@schemas/(.*)$",
+    "^@pages/(.*)$",
+    "^@ui/(.*)$",
+    "^@components/(.*)$",
+    "@/*",
+    "^../",
+    "^./"
+  ],
+  "importOrderSeparation": false,
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "printWidth": 80,
+  "proseWrap": "always",
+  "semi": true,
+  "singleQuote": true,
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "jsxSingleQuote": false
+}
