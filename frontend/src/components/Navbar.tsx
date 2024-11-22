@@ -18,7 +18,7 @@ const user = {
 const Navbar = () => {
   const TABS_AUTHORIZED = [
     { label: 'Threads', href: '/threads' },
-    { label: `Hi, ${user.username}`, href: '/profile/id' },
+    { label: `Hi, ${user.username}`, href: `/profile/${user.id}` },
     { label: <IoMdNotificationsOutline />, href: '/notifications' },
     { label: 'Logout', href: '/' },
   ];

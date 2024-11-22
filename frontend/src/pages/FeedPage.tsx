@@ -4,13 +4,21 @@ import { PostsList, NewPostTextarea } from '@components/index';
 import { DUMMY_POSTS } from '../dummy-data';
 import { IPost } from '../interfaces';
 
-const FeedPage = () => {
+type Props = {
+  userId?: string;
+};
+
+const FeedPage = ({ userId }: Props) => {
   const [addPost, setAddPost] = useState(false);
   const [posts, setPosts] = useState<IPost[]>([]);
   const [visiblePosts, setVisiblePosts] = useState<IPost[]>([]);
   const postsPerPage = 4;
 
   useEffect(() => {
+    if (userId) {
+      const posts = DUMMY_POSTS.filter(post => post.userId === userId);
+      setPosts(posts);
+    }
     setPosts(DUMMY_POSTS);
     setVisiblePosts(DUMMY_POSTS.slice(0, postsPerPage));
   }, []);
@@ -26,13 +34,15 @@ const FeedPage = () => {
     <div className="flex flex-col gap-10">
       <div className="flex justify-between pl-5 pr-5">
         <div className="custom-heading">Threads</div>
-        <Button
-          className="px-4 py-2 bg-pink-700 text-white rounded"
-          disabled={addPost}
-          onClick={() => setAddPost(prev => !prev)}
-        >
-          Create New One
-        </Button>
+        {!userId && (
+          <Button
+            className="px-4 py-2 bg-pink-700 text-white rounded"
+            disabled={addPost}
+            onClick={() => setAddPost(prev => !prev)}
+          >
+            Create New One
+          </Button>
+        )}
       </div>
       {addPost && <NewPostTextarea setAddPost={setAddPost} />}
       <PostsList posts={visiblePosts} />

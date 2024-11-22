@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { signupFormSchema } from '@schemas/signupFormSchema';
 import { Button } from '@ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@ui/card';
@@ -15,14 +14,33 @@ import {
 } from '@ui/form';
 import { Input } from '@ui/input';
 import { SelectAvatar } from '@components/index';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { IFormField } from '../interfaces';
+import { checkUsernameUnique } from 'src/api/user';
 
 const SignupPage = () => {
   const FORM_FIELDS: IFormField[] = [
-    { name: 'username', label: 'Username', placeholder: 'user name' },
-    { name: 'password', label: 'Password', placeholder: 'password' },
+    {
+      name: 'username',
+      type: 'text',
+      label: 'Username',
+      placeholder: 'user name',
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      placeholder: 'email',
+    },
+    {
+      name: 'password',
+      type: 'password',
+      label: 'Password',
+      placeholder: 'password',
+    },
     {
       name: 'repeatPassword',
+      type: 'password',
       label: 'Repeat Password',
       placeholder: 'repeat password',
     },
@@ -40,6 +58,17 @@ const SignupPage = () => {
     console.log(values);
   };
 
+  const checkUsername = async () => {
+    const username = form.getValues('username');
+    const isUnique = await checkUsernameUnique(username);
+    if (!isUnique) {
+      form.setError('username', {
+        type: 'manual',
+        message: 'Username is already taken, try another one.',
+      });
+    }
+  };
+
   return (
     <Form {...form}>
       <form
@@ -51,16 +80,20 @@ const SignupPage = () => {
             <CardTitle>Sign up</CardTitle>
           </CardHeader>
           <CardContent>
-            {FORM_FIELDS.map(field => (
+            {FORM_FIELDS.map(formField => (
               <FormField
-                key={field.name}
+                key={formField.name}
                 control={form.control}
-                name={field.name}
-                render={({ field: formField }) => (
+                name={formField.name}
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{field.label}</FormLabel>
+                    <FormLabel>{formField.label}</FormLabel>
                     <FormControl>
-                      <Input placeholder={field.placeholder} {...formField} />
+                      <Input
+                        type={formField.type}
+                        placeholder={formField.placeholder}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -86,6 +119,9 @@ const SignupPage = () => {
             </FormItem>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
+            <Button onClick={checkUsername} className="w-full" type="submit">
+              Check username availability
+            </Button>
             <Link
               className="hover:text-fuchsia-700 hover:underline"
               to="/login"

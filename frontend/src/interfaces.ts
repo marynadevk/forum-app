@@ -1,5 +1,6 @@
 export interface IFormField {
-  name: 'username' | 'password' | 'repeatPassword';
+  type: string;
+  name: 'username' | 'email' | 'password' | 'repeatPassword';
   label: string;
   placeholder: string;
 }

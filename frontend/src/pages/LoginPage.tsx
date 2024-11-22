@@ -18,8 +18,18 @@ import { IFormField } from '../interfaces';
 
 const LoginPage = () => {
   const FORM_FIELDS: IFormField[] = [
-    { name: 'username', label: 'Username', placeholder: 'user name' },
-    { name: 'password', label: 'Password', placeholder: 'password' },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      placeholder: 'email',
+    },
+    {
+      name: 'password',
+      type: 'password',
+      label: 'Password',
+      placeholder: 'password',
+    },
   ];
   const navigate = useNavigate();
   const defaultValues = {
@@ -50,12 +60,16 @@ const LoginPage = () => {
               <FormField
                 key={formField.name}
                 control={form.control}
-                name={formField.name as 'password' | 'username'}
+                name={formField.name as 'password' | 'email'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{formField.label}</FormLabel>
                     <FormControl>
-                      <Input placeholder={formField.placeholder} {...field} />
+                      <Input
+                        type={formField.type}
+                        placeholder={formField.placeholder}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
