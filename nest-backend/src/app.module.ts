@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from 'src/database/database.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       useFactory: (config: ConfigService) => config.get('database'),
       inject: [ConfigService],
     }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AppController],
   providers: [AppService],

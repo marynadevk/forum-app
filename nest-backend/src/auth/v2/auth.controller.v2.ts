@@ -1,19 +1,12 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthService } from './auth.service.v1';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { AuthV2Service } from './auth.service.v2';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { LoginDto } from '../dtos/login.dto';
 import { JwtAuthGuard } from '../jwt-auth.guard';
 
-@Controller('/v1/auth')
-export class AuthController {
-  constructor(private authService: AuthService) {}
+@Controller('/v2/auth')
+export class AuthV2Controller {
+  constructor(private authService: AuthV2Service) {}
   @Post('/signup')
   async createUser(@Body() body: CreateUserDto) {
     const user = await this.authService.signup(body);
@@ -33,7 +26,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/logout')
-  async logout(@Request() req) {
-    return req.logout();
+  async logout() {
+    return 'Logged out';
   }
 }
