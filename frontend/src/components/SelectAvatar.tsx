@@ -6,12 +6,38 @@ const options = Array.from({ length: 10 }, (_, index) => ({
   imgSrc: `/images/avatars/avatar${index + 1}.svg`,
 }));
 
-type Props = {
-  setAvatar: (avatar: string) => void;
-  selected: string | undefined;
+type OptionItemProps = {
+  option: { id: number; imgSrc: string };
+  setSelected: (option: { id: number; imgSrc: string }) => void;
+  setIsOpen: (isOpen: boolean) => void;
 };
 
-const SelectAvatar = ({ setAvatar }: Props) => {
+const OptionItem = ({ option, setSelected, setIsOpen }: OptionItemProps) => {
+  return (
+    <div
+      key={option.id}
+      className="flex justify-center gap-2 px-4 py-2 hover:bg-neutral-50 cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelected(option);
+        setIsOpen(false);
+      }}
+    >
+      <img
+        src={option.imgSrc}
+        alt={`avatar ${option.id}`}
+        className="w-6 h-6 rounded-full"
+      />
+    </div>
+  )
+}
+
+type Props = {
+  setAvatar: (avatar: string) => void;
+  selectedProps: string | undefined;
+};
+
+const SelectAvatar = ({ setAvatar, selectedProps }: Props) => {
   const [selected, setSelected] = useState(options[0]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -19,9 +45,14 @@ const SelectAvatar = ({ setAvatar }: Props) => {
     setIsOpen(!isOpen);
   };
 
+  console.log(isOpen);
+
   useEffect(() => {
+    if (selectedProps) {
+      setSelected(options.find(opt => opt.imgSrc === selectedProps) || options[0]);
+    }
     setAvatar(selected.imgSrc);
-  }, [selected, setAvatar]);
+  }, [selectedProps, setAvatar]);
 
   return (
     <div className="relative w-64">
@@ -36,29 +67,16 @@ const SelectAvatar = ({ setAvatar }: Props) => {
         />
         <FaAngleDown />
       </button>
-      <ul
+      <div
         id="dropdown"
         className={`absolute w-28 left-0 right-0 mt-2 bg-accent border rounded-lg shadow-md ${
           isOpen ? '' : 'hidden'
         }`}
       >
         {options.map(option => (
-          <li
-            key={option.id}
-            className="flex justify-center gap-2 px-4 py-2 hover:bg-neutral-50 cursor-pointer"
-            onClick={() => {
-              setSelected(option);
-              setIsOpen(false);
-            }}
-          >
-            <img
-              src={option.imgSrc}
-              alt={`avatar ${option.id}`}
-              className="w-6 h-6 rounded-full"
-            />
-          </li>
+          <OptionItem key={option.id} option={option} setSelected={setSelected} setIsOpen={setIsOpen} />
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

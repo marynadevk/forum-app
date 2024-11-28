@@ -15,8 +15,10 @@ import {
 import { Input } from '@ui/input';
 import { SelectAvatar } from '@components/index';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { signup } from '../api/';
 import { IFormField } from '../interfaces';
-import { checkUsernameUnique } from 'src/api/user';
+import useUserStore from '../store/authorized-user.store';
+import { toast } from 'react-toastify';
 
 const SignupPage = () => {
   const FORM_FIELDS: IFormField[] = [
@@ -45,29 +47,45 @@ const SignupPage = () => {
       placeholder: 'repeat password',
     },
   ];
-
+  const { setUser } = useUserStore();
+  const defaultValues = {
+    username: '',
+    email: '',
+    password: '',
+    repeatPassword: '',
+    avatar: 'avatar1',
+  };
   const form = useForm<z.infer<typeof signupFormSchema>>({
     resolver: zodResolver(signupFormSchema),
-    defaultValues: {
-      username: '',
-      avatar: 'avatar1',
-    },
+    defaultValues
   });
 
   const onSubmit = (values: z.infer<typeof signupFormSchema>) => {
-    console.log(values);
+    signup(
+      values.username,
+      values.email,
+      values.password,
+      values.avatar || 'avatar1'
+    ).then(resp => {
+      setUser(resp.user);
+      localStorage.setItem('user', JSON.stringify(resp.access_token));
+    }).catch(err => {
+      toast.error(err.response.message);
+    }).finally(() => {
+      form.reset(defaultValues);
+    });
   };
-
-  const checkUsername = async () => {
-    const username = form.getValues('username');
-    const isUnique = await checkUsernameUnique(username);
-    if (!isUnique) {
-      form.setError('username', {
-        type: 'manual',
-        message: 'Username is already taken, try another one.',
-      });
-    }
-  };
+//TODO: Implement checkUsername function
+  // const checkUsername = async () => {
+  //   const username = form.getValues('username');
+  //   const isUnique = await checkUsernameUnique(username);
+  //   if (!isUnique) {
+  //     form.setError('username', {
+  //       type: 'manual',
+  //       message: 'Username is already taken, try another one.',
+  //     });
+  //   }
+  // };
 
   return (
     <Form {...form}>
@@ -107,20 +125,20 @@ const SignupPage = () => {
                   control={form.control}
                   name="avatar"
                   render={({ field: { onChange, value } }) => (
-                    <SelectAvatar
-                      setAvatar={(avatar: string) => {
-                        onChange(avatar);
-                      }}
-                      selected={value}
-                    />
+                    <SelectAvatar setAvatar={onChange} selectedProps={value} />
                   )}
                 />
               </FormControl>
             </FormItem>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
-            <Button onClick={checkUsername} className="w-full" type="submit">
+            <Button 
+            // onClick={checkUsername}
+            className="w-full" type="button">
               Check username availability
+            </Button>
+            <Button className="w-full" type="submit">
+              Register
             </Button>
             <Link
               className="hover:text-fuchsia-700 hover:underline"
@@ -128,9 +146,6 @@ const SignupPage = () => {
             >
               Already have an account? Login
             </Link>
-            <Button className="w-full" type="submit">
-              Ok
-            </Button>
           </CardFooter>
         </Card>
       </form>

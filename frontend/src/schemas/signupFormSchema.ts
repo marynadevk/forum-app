@@ -4,7 +4,6 @@ export const signupFormSchema = z
   .object({
     username: z
       .string()
-      .startsWith('@', { message: 'Username must start with @ character.' })
       .min(3, {
         message: 'Username must be at least 3 characters.',
       })
@@ -19,10 +18,10 @@ export const signupFormSchema = z
       message: 'Repeat password must be at least 6 characters.',
     }),
     avatar: z.string().optional(),
-  })
-  .refine(
-    schema => {
-      return schema.repeatPassword !== schema.password;
-    },
-    { message: 'Passwords do not match.' }
-  );
+  });
+  // .refine(
+  //   schema => {
+  //     return schema.repeatPassword !== schema.password;
+  //   },
+  //   { message: 'Passwords do not match.' }
+  // );

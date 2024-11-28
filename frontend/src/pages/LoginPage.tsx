@@ -1,5 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import { login } from 'src/api';
+import useUserStore from 'src/store/authorized-user.store';
 import { z } from 'zod';
 import { loginFormSchema } from '@schemas/loginFormSchema';
 import { Button } from '@ui/button';
@@ -31,20 +34,30 @@ const LoginPage = () => {
       placeholder: 'password',
     },
   ];
+  const { setUser, user } = useUserStore();
   const navigate = useNavigate();
   const defaultValues = {
-    username: '',
+    email: '',
     password: '',
   };
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues,
   });
-
-  const handleSubmit = () => {
-    navigate('/threads');
+  //TODO fix logic displaying user
+  const handleSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+    try {
+      const token = await login(values.email, values.password);
+      localStorage.setItem('token', token.access_token);
+      navigate('/threads');
+    } catch (error: any) {
+      toast.error(error.response.data.message);
+      setUser(null);
+    } finally {
+      form.reset(defaultValues);
+    }
   };
-
+  console.log(user, 'LOGIN');
   return (
     <Form {...form}>
       <form
