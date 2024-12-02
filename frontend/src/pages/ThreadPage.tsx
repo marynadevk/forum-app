@@ -11,6 +11,7 @@ import {
 } from '@components/index';
 import { DUMMY_POSTS } from '../dummy-data';
 import { IUser } from '../interfaces';
+import ThreadImage from '@components/ThreadImage';
 
 const ThreadPage = () => {
   //TODO Fetch thread data
@@ -33,11 +34,7 @@ const ThreadPage = () => {
           </div>
           <div className="flex items-end">
             <p>{body}</p>
-            <img
-              src={image}
-              alt="post image"
-              className="w-[300px] object-cover"
-            />
+            <ThreadImage publicId={image as string} />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-start ">
