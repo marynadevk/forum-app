@@ -18,10 +18,8 @@ export const signupFormSchema = z
       message: 'Repeat password must be at least 6 characters.',
     }),
     avatar: z.string().optional(),
+  })
+  .refine((data) => data.password === data.repeatPassword, {
+    message: 'Passwords do not match.',
+    path: ['repeatPassword'],
   });
-  // .refine(
-  //   schema => {
-  //     return schema.repeatPassword !== schema.password;
-  //   },
-  //   { message: 'Passwords do not match.' }
-  // );

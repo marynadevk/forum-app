@@ -25,9 +25,11 @@ export const signup = async (
   return response.data;
 };
 
-export const checkUsernameUnique = async (username: string) => {
-  const response = await api.get(`/auth/check-username?username=${username}`);
-  return response.data;
+export const checkUsernameUnique = async (username: string): Promise<boolean> => {
+  const response = await api.get(`/auth/check-username`, {
+    params: { username },
+  });
+  return response.data.isUnique;
 };
 
 export const logout = async (userId: string) => {

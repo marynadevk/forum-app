@@ -14,21 +14,34 @@ import { JwtAuthGuard } from '../jwt-auth.guard';
 @Controller('/v1/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
   @Post('/signup')
   async createUser(@Body() body: CreateUserDto) {
-    const user = await this.authService.signup(body);
-    return user;
+    return await this.authService.signup(body);
   }
+
   @Get('/check-username')
   async checkUsernameUnique(username: string) {
-    const user = await this.authService.checkUsernameUnique(username);
-    return user;
+    return await this.authService.checkUsernameUnique(username);
   }
+
   @Post('/login')
   async login(@Body() body: LoginDto) {
     const { email, password } = body;
-    const user = await this.authService.login(email, password);
-    return user;
+    return await this.authService.login(email, password);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Request() req) {
+    const { userId } = req.user;
+    const user = await this.authService.findUserById(userId);
+    return {
+      id: userId,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar,
+    };
   }
 
   @UseGuards(JwtAuthGuard)

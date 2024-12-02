@@ -5,20 +5,20 @@ import { router } from './router';
 import useUserStore from './store/authorized-user.store';
 
 const App = () => {
+  const token = localStorage.getItem('token');
   const { setUser } = useUserStore();
   useEffect(() => {
-    const token = localStorage.getItem('token');
     if (token) {
       getMe()
-        .then(user => {
-          setUser(user);
+        .then(response => {
+          setUser(response);
         })
         .catch(err => {
           console.error(err);
           localStorage.removeItem('token');
         });
     }
-  }, [setUser]);
+  }, [token, setUser]);
 
   return <RouterProvider router={router} />;
 };

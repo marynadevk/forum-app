@@ -2,7 +2,8 @@ import axios from 'axios';
 import { envConfig } from '../../config';
 
 const api = axios.create({
-  baseURL: envConfig.apiBaseUrl,
+  // baseURL: envConfig.apiBaseUrl,
+  baseURL: envConfig.v2_apiBaseUrl,
 });
 
 api.interceptors.request.use(

@@ -8,19 +8,17 @@ const options = Array.from({ length: 10 }, (_, index) => ({
 
 type OptionItemProps = {
   option: { id: number; imgSrc: string };
-  setSelected: (option: { id: number; imgSrc: string }) => void;
-  setIsOpen: (isOpen: boolean) => void;
+  onSelect: (option: { id: number; imgSrc: string }) => void;
 };
 
-const OptionItem = ({ option, setSelected, setIsOpen }: OptionItemProps) => {
+const OptionItem = ({ option, onSelect }: OptionItemProps) => {
   return (
     <div
-      key={option.id}
       className="flex justify-center gap-2 px-4 py-2 hover:bg-neutral-50 cursor-pointer"
       onClick={(e) => {
+        e.preventDefault();
         e.stopPropagation();
-        setSelected(option);
-        setIsOpen(false);
+        onSelect(option);
       }}
     >
       <img
@@ -29,11 +27,16 @@ const OptionItem = ({ option, setSelected, setIsOpen }: OptionItemProps) => {
         className="w-6 h-6 rounded-full"
       />
     </div>
-  )
-}
+  );
+};
+
+type UserChangeableData = {
+  username: string;
+  avatar: string;
+};
 
 type Props = {
-  setAvatar: (avatar: string) => void;
+  setAvatar: (updater: (prev: UserChangeableData) => UserChangeableData) => void;
   selectedProps: string | undefined;
 };
 
@@ -41,24 +44,33 @@ const SelectAvatar = ({ setAvatar, selectedProps }: Props) => {
   const [selected, setSelected] = useState(options[0]);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleClick = () => {
-    setIsOpen(!isOpen);
+  const toggleDropdown = () => {
+    setIsOpen((prev) => !prev);
   };
 
-  console.log(isOpen);
+  const handleSelect = (option: { id: number; imgSrc: string }) => {
+    setSelected(option);
+    setAvatar((prev) => ({
+      ...prev,
+      avatar: option.imgSrc,
+    }));
+    setIsOpen(false);
+  };
 
   useEffect(() => {
     if (selectedProps) {
-      setSelected(options.find(opt => opt.imgSrc === selectedProps) || options[0]);
+      const matchingOption = options.find((opt) => opt.imgSrc === selectedProps);
+      if (matchingOption) {
+        setSelected(matchingOption);
+      }
     }
-    setAvatar(selected.imgSrc);
-  }, [selectedProps, setAvatar]);
+  }, [selectedProps]);
 
   return (
     <div className="relative w-64">
       <button
         className="flex items-center gap-2 justify-center w-28 px-4 py-2 border rounded-lg bg-accent shadow-md"
-        onClick={handleClick}
+        onClick={toggleDropdown}
       >
         <img
           src={selected.imgSrc}
@@ -67,16 +79,16 @@ const SelectAvatar = ({ setAvatar, selectedProps }: Props) => {
         />
         <FaAngleDown />
       </button>
-      <div
-        id="dropdown"
-        className={`absolute w-28 left-0 right-0 mt-2 bg-accent border rounded-lg shadow-md ${
-          isOpen ? '' : 'hidden'
-        }`}
-      >
-        {options.map(option => (
-          <OptionItem key={option.id} option={option} setSelected={setSelected} setIsOpen={setIsOpen} />
-        ))}
-      </div>
+      {isOpen && (
+        <div
+          id="dropdown"
+          className="absolute w-28 left-0 right-0 mt-2 bg-accent border rounded-lg shadow-md"
+        >
+          {options.map((option) => (
+            <OptionItem key={option.id} option={option} onSelect={handleSelect} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

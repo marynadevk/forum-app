@@ -8,12 +8,13 @@ export interface IFormField {
 export interface IUser {
   id: string;
   username: string;
+  email: string;
   avatar: string;
 }
 
 export interface IUserProfile extends IUser {
   posts: IPost[]
-  reactions: number;
+  impressions: number;
 }
 
 export interface IPost {

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
 import { login } from 'src/api';
+import { handleError } from 'src/helpers/errorHandler';
 import useUserStore from 'src/store/authorized-user.store';
 import { z } from 'zod';
 import { loginFormSchema } from '@schemas/loginFormSchema';
@@ -34,7 +34,7 @@ const LoginPage = () => {
       placeholder: 'password',
     },
   ];
-  const { setUser, user } = useUserStore();
+  const { setUser } = useUserStore();
   const navigate = useNavigate();
   const defaultValues = {
     email: '',
@@ -46,18 +46,18 @@ const LoginPage = () => {
   });
   //TODO fix logic displaying user
   const handleSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+    const { email, password } = values;
     try {
-      const token = await login(values.email, values.password);
-      localStorage.setItem('token', token.access_token);
-      navigate('/threads');
-    } catch (error: any) {
-      toast.error(error.response.data.message);
-      setUser(null);
-    } finally {
+      const response = await login(email, password);
       form.reset(defaultValues);
+      localStorage.setItem('token', response.access_token);
+      navigate('/threads');
+    } catch (error) {
+      handleError(error);
+      setUser(null);
     }
   };
-  console.log(user, 'LOGIN');
+
   return (
     <Form {...form}>
       <form

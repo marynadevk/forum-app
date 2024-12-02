@@ -1,31 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { AuthDao } from './auth.dao.v1';
 import * as bcrypt from 'bcryptjs';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { TokenService } from '../token.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly authDao: AuthDao,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly tokenService: TokenService,
   ) {}
-
-  private jwtOptions = {
-    secret: this.configService.get<string>('JWT_SECRET'),
-  };
 
   async signup(userData: CreateUserDto) {
     const { password, email, avatar, username } = userData;
     const user = await this.authDao.findUserByEmail(email);
     if (user) {
-      throw new Error('Email already exists');
+      throw new ConflictException(
+        'User with provided email or username already exists',
+      );
     }
     const usernameExists = await this.authDao.findUserByUsername(username);
     if (usernameExists) {
-      throw new Error('Username already exists');
+      throw new ConflictException('Username already exists');
     }
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
@@ -38,7 +39,7 @@ export class AuthService {
       id: -1,
     });
 
-    return savedUser;
+    return this.tokenService.generateToken(savedUser);
   }
 
   async checkUsernameUnique(username: string) {
@@ -48,24 +49,19 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.authDao.findUserByEmail(email);
-    console.log(user);
     if (!user) {
-      throw new Error('User not found');
-    }
-    const isPasswordCorrect = bcrypt.compareSync(password, user.password);
-    if (!isPasswordCorrect) {
-      throw new Error('Invalid password');
+      throw new NotFoundException(`User with email: ${email} not found`);
     }
 
-    const payload = { username: user.username, sub: user.userId };
-    return {
-      access_token: this.jwtService.sign(payload, this.jwtOptions),
-      user: {
-        id: user.userId,
-        username: user.username,
-        email: user.email,
-        avatar: user.avatar,
-      },
-    };
+    const isPasswordCorrect = bcrypt.compareSync(password, user.password);
+    if (!isPasswordCorrect) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    return this.tokenService.generateToken(user);
+  }
+
+  async findUserById(userId: string) {
+    return await this.authDao.findUserById(userId);
   }
 }

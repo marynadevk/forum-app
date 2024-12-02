@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from 'src/database/database.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PassportModule } from '@nestjs/passport';
       inject: [ConfigService],
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

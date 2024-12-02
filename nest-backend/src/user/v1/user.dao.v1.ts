@@ -3,7 +3,7 @@ import { User } from 'src/database/entities/user.entity';
 import { EntityManager } from 'typeorm';
 
 @Injectable()
-export class AuthDao {
+export class UserDao {
   constructor(private readonly entityManager: EntityManager) {}
 
   async findUserById(userId: string): Promise<User> {
@@ -13,29 +13,24 @@ export class AuthDao {
     return result.length > 0 ? result[0] : null;
   }
 
-  async findUserByEmail(email: string): Promise<User> {
-    const query = `SELECT * FROM public.user WHERE email = $1`;
-    const result = await this.entityManager.query(query, [email]);
-    return result.length > 0 ? result[0] : null;
-  }
-
-  async findUserByUsername(username: string) {
+  async findUserByUsername(username: string): Promise<User> {
     const query = `SELECT * FROM public.user WHERE username = $1`;
     const result = await this.entityManager.query(query, [username]);
-
     return result.length > 0 ? result[0] : null;
   }
 
-  async saveUser(userData: User) {
-    const { password, email, avatar, username } = userData;
-    const query = `INSERT INTO public.user (password, email, avatar, username) VALUES ($1, $2, $3, $4) RETURNING *`;
+  async changeUserData({ username, avatar, id }): Promise<User> {
+    const query = `UPDATE public.user SET username = $1, avatar = $2 WHERE id = $3 RETURNING *`;
     const result = await this.entityManager.query(query, [
-      password,
-      email,
-      avatar,
       username,
+      avatar,
+      id,
     ]);
+    return result.length > 0 ? result[0][0] : null;
+  }
 
-    return result[0];
+  async deleteUser(userId: string): Promise<void> {
+    const query = `DELETE FROM public.user WHERE id = $1`;
+    await this.entityManager.query(query, [userId]);
   }
 }

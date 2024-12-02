@@ -3,6 +3,7 @@ import { RiImageAddLine } from 'react-icons/ri';
 import { Button } from '@ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@ui/dialog';
 import { Input } from '@ui/input';
+import { handleError } from 'src/helpers/errorHandler';
 
 type Props = {
   setImage: React.Dispatch<React.SetStateAction<string>>;
@@ -32,7 +33,7 @@ const UploadImgBtn = ({ setImage }: Props) => {
       setPreview(null);
       setIsDialogOpen(false);
     } catch (error) {
-      console.error('Upload failed', error);
+      handleError(error);
     } finally {
       button.disabled = false;
       button.innerHTML = 'Upload';

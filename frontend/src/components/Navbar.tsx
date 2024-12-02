@@ -34,7 +34,6 @@ const Navbar = () => {
   ];
 
   const TABS = user ? TABS_AUTHORIZED : TABS_UNAUTHORIZED;
-
   return (
     <NavigationMenu>
       <NavigationMenuList>

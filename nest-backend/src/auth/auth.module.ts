@@ -10,6 +10,7 @@ import { AuthV2Controller } from './v2/auth.controller.v2';
 import { AuthV2Service } from './v2/auth.service.v2';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/database/entities/user.entity';
+import { TokenService } from './token.service';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { User } from 'src/database/entities/user.entity';
     }),
   ],
   controllers: [AuthController, AuthV2Controller],
-  providers: [AuthService, AuthV2Service, AuthDao, JwtStrategy],
+  providers: [AuthService, AuthV2Service, AuthDao, JwtStrategy, TokenService],
   exports: [JwtModule, PassportModule],
 })
 export class AuthModule {}

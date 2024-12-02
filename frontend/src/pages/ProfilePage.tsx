@@ -1,7 +1,12 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { GrEdit } from 'react-icons/gr';
 import { MdOutlineDelete } from 'react-icons/md';
+import { toast } from 'react-toastify';
+import { deleteUser, getUserProfile, updateUser } from 'src/api';
+import { handleError } from 'src/helpers/errorHandler';
+import { IUserProfile } from 'src/interfaces';
+import useUserStore from 'src/store/authorized-user.store';
 import { Avatar, AvatarImage } from '@ui/avatar';
 import { Button } from '@ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@ui/card';
@@ -18,7 +23,6 @@ import { Input } from '@ui/input';
 import { Label } from '@ui/label';
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -27,38 +31,82 @@ import {
   SheetTrigger,
 } from '@ui/sheet';
 import { SelectAvatar } from '@components/index';
-import { USERS_PROFILES } from '../dummy-data';
-import { IUserProfile } from '../interfaces';
-
-const DEFAULT_USER: IUserProfile = {
-  id: '101',
-  username: 'admin',
-  avatar: '/images/avatars/avatar1',
-  reactions: 0,
-  posts: [],
-};
 
 const ProfilePage = () => {
-  const [isMyProfile, setIsMyProfile] = useState(true);
-  const [avatar, setAvatar] = useState('/images/avatars/avatar1');
-  const [user, setUser] = useState<IUserProfile>(DEFAULT_USER);
   const params = useParams();
+  const navigate = useNavigate();
+  const { user, setUser } = useUserStore();
+
+  const [profile, setProfile] = useState<IUserProfile | null>(null);
+  const [password, setPassword] = useState('');
+  const [isSheetOpen, setSheetOpen] = useState(false);
   const id = params.id;
+  const authUserId = user?.id;
+  const isMyProfile = id == authUserId;
+  const [userChangeableData, setUserChangeableData] = useState({
+    username: user?.username as string,
+    avatar: user?.avatar as string,
+  });
 
   useEffect(() => {
-    //TODO Fetch user data
-    const user = USERS_PROFILES.find(user => user.id === id);
-    if (!user) return;
-    setUser(user);
-    setIsMyProfile(true);
+    setUserChangeableData({
+      username: user?.username as string,
+      avatar: user?.avatar as string,
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (!id) return;
+    getUserProfile(id).then(setProfile);
   }, [id]);
 
-  const handleUsernameChange = (e: ChangeEvent) => {
-    setUser({ ...user, username: (e.target as HTMLInputElement).value });
+  const handleSaveChanges = async () => {
+    if (!id) return;
+    try {
+      if (userChangeableData.username.length < 2) {
+        throw new Error('Username must be at least 2 characters long');
+      }
+      const updatedUser = await updateUser(id, userChangeableData);
+      setUser({ ...user, ...updatedUser });
+      setProfile(updatedUser);
+      toast.success('Profile updated successfully');
+      setSheetOpen(false);
+      return true;
+    } catch (error) {
+      handleError(error);
+      return false;
+    }
   };
 
-  const handleChangeDeleteProfile = (e: ChangeEvent) => {
-    console.log((e.target as HTMLInputElement).value);
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === 'username' && user) {
+      setUserChangeableData(prev => ({
+        ...prev,
+        username: value,
+      }));
+    } else if (name === 'password') {
+      setPassword(value);
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!password) {
+      toast.error('Password is required to delete your profile.');
+      return;
+    }
+    try {
+      await deleteUser(authUserId!, password);
+      toast.success('Profile deleted successfully');
+      setUser(null);
+      setProfile(null);
+      localStorage.removeItem('token');
+      navigate('/signup');
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setPassword('');
+    }
   };
 
   return (
@@ -70,18 +118,18 @@ const ProfilePage = () => {
         <div className="flex items-center gap-5">
           Avatar:
           <Avatar>
-            <AvatarImage src={avatar} />
+            <AvatarImage src={profile?.avatar} />
           </Avatar>
         </div>
-        <span>Username: {user.username}</span>
+        <span>Username: {profile?.username}</span>
         <Link to={`/profile/${id}/threads`} className="hover:underline">
-          <span>Posts: {user.posts.length}</span>
+          <span>Posts: {profile?.posts.length}</span>
         </Link>
-        <span>Reactions on their posts: </span>
+        <span>Reactions on their posts: {profile?.impressions}</span>
       </CardContent>
       {isMyProfile && (
         <CardFooter className="flex justify-between">
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
               <Button>
                 <GrEdit /> profile
@@ -100,9 +148,12 @@ const ProfilePage = () => {
                   <Label htmlFor="username" className="text-right">
                     Avatar
                   </Label>
-                  <SelectAvatar setAvatar={setAvatar} selected={user.avatar} />
+                  <SelectAvatar
+                    setAvatar={setUserChangeableData}
+                    selectedProps={userChangeableData?.avatar}
+                  />
                   <Avatar>
-                    <AvatarImage src={user.avatar} />
+                    <AvatarImage src={userChangeableData?.avatar} />
                   </Avatar>
                 </div>
                 <form className="grid grid-cols-4 items-center gap-4">
@@ -111,16 +162,17 @@ const ProfilePage = () => {
                   </Label>
                   <Input
                     id="username"
-                    value={user.username}
-                    onChange={handleUsernameChange}
+                    name="username"
+                    placeholder={`your username is: ${user?.username}`}
+                    onChange={handleChange}
                     className="col-span-3"
                   />
                 </form>
               </div>
               <SheetFooter>
-                <SheetClose asChild>
-                  <Button type="submit">Save changes</Button>
-                </SheetClose>
+                <Button type="button" onClick={handleSaveChanges}>
+                  Save changes
+                </Button>
               </SheetFooter>
             </SheetContent>
           </Sheet>
@@ -139,22 +191,26 @@ const ProfilePage = () => {
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <span className="text-center">Username: {user.username}</span>
+                <span className="text-center">
+                  Username: {profile?.username}
+                </span>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="password" className="text-right">
                     Password
                   </Label>
                   <Input
-                    onChange={handleChangeDeleteProfile}
+                    onChange={handleChange}
                     type="password"
                     id="password"
-                    value={''}
+                    name="password"
                     className="col-span-3"
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit">I want to delete my profile</Button>
+                <Button type="button" onClick={handleDeleteProfile}>
+                  I want to delete my profile
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

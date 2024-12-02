@@ -1,5 +1,8 @@
-import { Link } from 'react-router-dom';
-import { Controller, useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import { NAME_MSGS } from 'src/constants/constants';
+import { handleError } from 'src/helpers/errorHandler';
 import { z } from 'zod';
 import { signupFormSchema } from '@schemas/signupFormSchema';
 import { Button } from '@ui/button';
@@ -13,12 +16,10 @@ import {
   FormMessage,
 } from '@ui/form';
 import { Input } from '@ui/input';
-import { SelectAvatar } from '@components/index';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signup } from '../api/';
+import { signup, checkUsernameUnique } from '../api/';
 import { IFormField } from '../interfaces';
 import useUserStore from '../store/authorized-user.store';
-import { toast } from 'react-toastify';
 
 const SignupPage = () => {
   const FORM_FIELDS: IFormField[] = [
@@ -53,39 +54,52 @@ const SignupPage = () => {
     email: '',
     password: '',
     repeatPassword: '',
-    avatar: 'avatar1',
+    avatar: '/images/avatars/avatar1.svg',
   };
+  const navigate = useNavigate();
   const form = useForm<z.infer<typeof signupFormSchema>>({
     resolver: zodResolver(signupFormSchema),
-    defaultValues
+    defaultValues,
   });
 
-  const onSubmit = (values: z.infer<typeof signupFormSchema>) => {
-    signup(
-      values.username,
-      values.email,
-      values.password,
-      values.avatar || 'avatar1'
-    ).then(resp => {
-      setUser(resp.user);
-      localStorage.setItem('user', JSON.stringify(resp.access_token));
-    }).catch(err => {
-      toast.error(err.response.message);
-    }).finally(() => {
+  const onSubmit = async (values: z.infer<typeof signupFormSchema>) => {
+    const { username, email, password } = values;
+    const randomAvatarNumber = Math.floor(Math.random() * 10) + 1;
+    const avatar = `/images/avatars/avatar${randomAvatarNumber}.svg`;
+    try {
+      const response = await signup(username, email, password, avatar);
+      localStorage.setItem('token', response.access_token);
       form.reset(defaultValues);
-    });
+      toast.success('Profile created successfully, enjoy!');
+      navigate('/threads');
+    } catch (error) {
+      handleError(error);
+      setUser(null);
+    }
   };
-//TODO: Implement checkUsername function
-  // const checkUsername = async () => {
-  //   const username = form.getValues('username');
-  //   const isUnique = await checkUsernameUnique(username);
-  //   if (!isUnique) {
-  //     form.setError('username', {
-  //       type: 'manual',
-  //       message: 'Username is already taken, try another one.',
-  //     });
-  //   }
-  // };
+
+  const checkUsername = async () => {
+    const username = form.getValues('username').trim();
+    if (!username) {
+      form.setError('username', {
+        type: 'manual',
+        message: NAME_MSGS.required,
+      });
+      return;
+    }
+
+    const isUnique = await checkUsernameUnique(username);
+    if (!isUnique) {
+      form.setError('username', {
+        type: 'manual',
+        message: NAME_MSGS.taken,
+      });
+      toast.error(NAME_MSGS.taken);
+    } else {
+      form.clearErrors('username');
+      toast.success(NAME_MSGS.available);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -118,23 +132,9 @@ const SignupPage = () => {
                 )}
               />
             ))}
-            <FormItem>
-              <FormLabel>Choose your avatar</FormLabel>
-              <FormControl>
-                <Controller
-                  control={form.control}
-                  name="avatar"
-                  render={({ field: { onChange, value } }) => (
-                    <SelectAvatar setAvatar={onChange} selectedProps={value} />
-                  )}
-                />
-              </FormControl>
-            </FormItem>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
-            <Button 
-            // onClick={checkUsername}
-            className="w-full" type="button">
+            <Button onClick={checkUsername} className="w-full" type="button">
               Check username availability
             </Button>
             <Button className="w-full" type="submit">
