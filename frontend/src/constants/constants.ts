@@ -9,3 +9,5 @@ export const NAME_MSGS = {
   taken: 'Username is already taken',
   available: 'Username is available',
 };
+
+export const POSTS_PER_PAGE = 4;

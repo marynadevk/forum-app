@@ -30,6 +30,7 @@ export class AuthV2Controller {
     const user = await this.authService.checkUsernameUnique(username);
     return { isUnique: !user };
   }
+
   @Post('/login')
   async login(@Body() body: LoginDto) {
     const { email, password } = body;

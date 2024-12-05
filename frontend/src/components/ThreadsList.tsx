@@ -8,24 +8,26 @@ import {
   CardTitle,
 } from '@ui/card';
 import { IPost } from '../interfaces';
+import TimeAgo from './TimeAgo';
 
 type Props = {
   posts: IPost[];
 };
 
-const PostsList = ({ posts }: Props) => {
+const ThreadsList = ({ posts }: Props) => {
   const navigate = useNavigate();
   const handleReadMore = (id: string) => {
     navigate(`/threads/${id}`);
   };
+
   return (
     <div className="flex flex-col gap-3">
-      {posts.map(({ body, id, createdAt, title }) => (
+      {posts.map(({ content, id, createdAt, title }) => (
         <Card key={id} className="w-full">
           <CardHeader>
             <CardTitle>{title}</CardTitle>
             <CardDescription>
-              {body.length > 100 ? body.slice(0, 100) + '...' : body}
+              {content.length > 100 ? content.slice(0, 100) + '...' : content}
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-between">
@@ -33,7 +35,7 @@ const PostsList = ({ posts }: Props) => {
             <div className="text-sm">
               Posted:{' '}
               <span className="text-slate-400">
-                {new Date(createdAt).toLocaleString()}
+                <TimeAgo date={createdAt} />
               </span>
             </div>
           </CardFooter>
@@ -43,4 +45,4 @@ const PostsList = ({ posts }: Props) => {
   );
 };
 
-export default PostsList;
+export default ThreadsList;

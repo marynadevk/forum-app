@@ -1,7 +1,11 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { deleteThread, getThread, updateThread } from 'src/api/threads';
+import { handleError } from 'src/helpers/errorHandler';
 import { Card, CardHeader, CardContent, CardFooter } from '@ui/card';
 import { Separator } from '@ui/separator';
+import EditContent from '@components/EditContent';
+import ThreadImage from '@components/ThreadImage';
 import {
   Comment,
   ActionsBar,
@@ -9,17 +13,51 @@ import {
   NewCommentTextarea,
   UserLink,
 } from '@components/index';
-import { DUMMY_POSTS } from '../dummy-data';
-import { IUser } from '../interfaces';
-import ThreadImage from '@components/ThreadImage';
+import { IPost, IUser } from '../interfaces';
 
 const ThreadPage = () => {
-  //TODO Fetch thread data
   const { id } = useParams();
   const [addComment, setAddComment] = useState(false);
-  const post = DUMMY_POSTS.find(post => post.id === id);
+  const [post, setPost] = useState<IPost | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState({ title: '', content: '' });
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!id) return;
+    getThread(id).then(setPost);
+  }, [id]);
   if (!post) return <div>Post not found</div>;
-  const { title, body, userId, image, createdAt, user, likes, comments } = post;
+
+  const { title, content, author, image, createdAt, likes, comments } = post;
+
+  const handleEditContent = () => {
+    setEditContent({ title, content });
+    setIsEditing(!isEditing);
+  };
+
+  const handleDeleteContent = async () => {
+    try {
+      await deleteThread(id as string);
+      setPost(null);
+      navigate('/threads');
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const handleSaveContent = async () => {
+    try {
+      await updateThread(id as string, editContent);
+      setPost(prev => ({
+        ...prev!,
+        ...editContent,
+      }));
+      setIsEditing(false);
+      setEditContent({ title: '', content: '' });
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
   return (
     <div className="">
@@ -29,22 +67,41 @@ const ThreadPage = () => {
         </CardHeader>
         <CardContent>
           <div className="flex justify-between">
-            <UserLink user={user as IUser} />
+            <div className="flex gap-2 items-center">
+              Posted by <UserLink user={author as IUser} />
+            </div>
             <TimeAgo date={createdAt} />
           </div>
-          <div className="flex items-end">
-            <p>{body}</p>
-            <ThreadImage publicId={image as string} />
+          <div className="flex items-end justify-between w-full">
+            <div className={`h-full ${image ? 'w-2/3' : 'w-full'}`}>
+              {isEditing ? (
+                <EditContent
+                  editContent={editContent}
+                  setEditContent={setEditContent}
+                  onSave={handleSaveContent}
+                />
+              ) : (
+                content
+              )}
+            </div>
+            {image && (
+              <div className="ml-4 w-1/3">
+                <ThreadImage publicId={image as string} />
+              </div>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-start ">
           <Separator className="my-4 bg-pink-300" />
           <ActionsBar
-            userId={userId}
+            authorId={author.id}
             likes={likes}
             comments={comments}
             addComment={addComment}
             setAddComment={setAddComment}
+            onEditContent={handleEditContent}
+            onDeleteContent={handleDeleteContent}
+            isEditing={isEditing}
           />
           {addComment && <NewCommentTextarea postId={id as string} />}
         </CardFooter>

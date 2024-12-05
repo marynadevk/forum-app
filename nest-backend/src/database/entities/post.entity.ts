@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -15,19 +16,27 @@ import { User } from './user.entity';
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
+
   @Column()
   title: string;
+
   @Column()
   content: string;
-  @ManyToOne(() => User, (user) => user.id)
+
+  @ManyToOne(() => User, (user) => user.id, { eager: true })
+  @JoinColumn()
   author: User;
+
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
   @OneToMany(() => Comment, (comment) => comment.post, { nullable: true })
   comments: Comment[];
+
   @ManyToMany(() => User, { nullable: true })
   @JoinTable()
   likes: User[];
+
   @Column({ nullable: true })
   image: string;
 }

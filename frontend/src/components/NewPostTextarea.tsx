@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Picker, { EmojiClickData } from 'emoji-picker-react';
 import { AiOutlineSend } from 'react-icons/ai';
 import { BsEmojiSmile } from 'react-icons/bs';
 import { MdCancelScheduleSend } from 'react-icons/md';
+import { createThread } from 'src/api';
+import { handleError } from 'src/helpers/errorHandler';
+import { IPost } from 'src/interfaces';
 import { z } from 'zod';
 import { newPostFormSchema } from '@schemas/newPostFormSchema';
 import { Button } from '@ui/button';
@@ -12,14 +15,16 @@ import { Input } from '@ui/input';
 import { Textarea } from '@ui/textarea';
 import { UploadImgBtn } from '@components/index';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DUMMY_POSTS, USERS } from '../dummy-data';
 
 type Props = {
   setAddPost: React.Dispatch<React.SetStateAction<boolean>>;
+  setPosts: React.Dispatch<React.SetStateAction<IPost[]>>;
 };
 
-const NewPostTextarea = ({ setAddPost }: Props) => {
+const NewPostTextarea = ({ setAddPost, setPosts }: Props) => {
   const [isOpenEmojis, setIsOpenEmojis] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
   const form = useForm<z.infer<typeof newPostFormSchema>>({
     resolver: zodResolver(newPostFormSchema),
     defaultValues: {
@@ -29,28 +34,44 @@ const NewPostTextarea = ({ setAddPost }: Props) => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof newPostFormSchema>) => {
-    console.log('New post submitted values:', values);
-    const author = USERS.filter(user => user.id === '101')[0];
-    DUMMY_POSTS.push({
-      id: (DUMMY_POSTS.length + 1).toString(),
-      title: values.title,
-      body: values.content,
-      image: values.image,
-      user: author,
-      userId: '101',
-      createdAt: new Date().toISOString(),
-      likes: [],
-      comments: [],
-    });
-    form.reset();
-    setAddPost(false);
+  const onSubmit = async (values: z.infer<typeof newPostFormSchema>) => {
+    try {
+      const newThreadData = { ...values };
+      await createThread(newThreadData);
+
+      setPosts(prevData => [newThreadData as IPost, ...prevData]);
+      form.reset();
+      setAddPost(false);
+    } catch (error) {
+      handleError(error);
+    }
   };
 
   const onEmojiClick = (emojiObject: EmojiClickData) => {
     const currentContent = form.getValues('content');
     form.setValue('content', currentContent + emojiObject.emoji);
+    setIsOpenEmojis(false);
   };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      emojiPickerRef.current &&
+      !emojiPickerRef.current.contains(event.target as Node)
+    ) {
+      setIsOpenEmojis(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpenEmojis) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpenEmojis]);
 
   return (
     <Form {...form}>
@@ -111,17 +132,33 @@ const NewPostTextarea = ({ setAddPost }: Props) => {
           >
             <BsEmojiSmile />
           </Button>
-          <Picker
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              position: 'absolute',
-              zIndex: 9999,
-              top: '0',
-              right: '55%',
-            }}
-            open={isOpenEmojis}
-            onEmojiClick={onEmojiClick}
-          />
+          {isOpenEmojis && (
+            <div
+              ref={emojiPickerRef}
+              className="absolute z-50 bg-white shadow-md rounded-md p-1"
+              style={{
+                top: '-170px',
+                left: '150px',
+              }}
+            >
+              <Picker
+                className="overflow-y-auto"
+                skinTonesDisabled
+                style={
+                  {
+                    '--epr-emoji-size': '20px',
+                  } as React.CSSProperties
+                }
+                width={600}
+                height={150}
+                onEmojiClick={onEmojiClick}
+                searchDisabled
+                previewConfig={{
+                  showPreview: false,
+                }}
+              />
+            </div>
+          )}
         </div>
       </form>
     </Form>

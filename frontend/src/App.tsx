@@ -3,9 +3,10 @@ import { RouterProvider } from 'react-router-dom';
 import { getMe } from './api/auth';
 import { router } from './router';
 import useUserStore from './store/authorized-user.store';
+import useTokenStore from './store/token.store';
 
 const App = () => {
-  const token = localStorage.getItem('token');
+  const { token, removeToken } = useTokenStore();
   const { setUser } = useUserStore();
   useEffect(() => {
     if (token) {
@@ -15,10 +16,10 @@ const App = () => {
         })
         .catch(err => {
           console.error(err);
-          localStorage.removeItem('token');
+          removeToken();
         });
     }
-  }, [token, setUser]);
+  }, [token]);
 
   return <RouterProvider router={router} />;
 };

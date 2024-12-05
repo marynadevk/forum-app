@@ -44,7 +44,7 @@ export class AuthService {
 
   async checkUsernameUnique(username: string) {
     const user = await this.authDao.findUserByUsername(username);
-    return user ? false : true;
+    return !!user;
   }
 
   async login(email: string, password: string) {

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { login } from 'src/api';
 import { handleError } from 'src/helpers/errorHandler';
 import useUserStore from 'src/store/authorized-user.store';
+import useTokenStore from 'src/store/token.store';
 import { z } from 'zod';
 import { loginFormSchema } from '@schemas/loginFormSchema';
 import { Button } from '@ui/button';
@@ -36,6 +37,7 @@ const LoginPage = () => {
   ];
   const { setUser } = useUserStore();
   const navigate = useNavigate();
+  const { setToken, removeToken } = useTokenStore();
   const defaultValues = {
     email: '',
     password: '',
@@ -44,17 +46,17 @@ const LoginPage = () => {
     resolver: zodResolver(loginFormSchema),
     defaultValues,
   });
-  //TODO fix logic displaying user
   const handleSubmit = async (values: z.infer<typeof loginFormSchema>) => {
     const { email, password } = values;
     try {
       const response = await login(email, password);
       form.reset(defaultValues);
-      localStorage.setItem('token', response.access_token);
+      setToken(response.access_token);
       navigate('/threads');
     } catch (error) {
       handleError(error);
       setUser(null);
+      removeToken();
     }
   };
 

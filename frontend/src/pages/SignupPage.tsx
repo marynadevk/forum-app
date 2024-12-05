@@ -20,6 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signup, checkUsernameUnique } from '../api/';
 import { IFormField } from '../interfaces';
 import useUserStore from '../store/authorized-user.store';
+import useTokenStore from 'src/store/token.store';
 
 const SignupPage = () => {
   const FORM_FIELDS: IFormField[] = [
@@ -49,6 +50,7 @@ const SignupPage = () => {
     },
   ];
   const { setUser } = useUserStore();
+  const { setToken, removeToken } = useTokenStore();
   const defaultValues = {
     username: '',
     email: '',
@@ -68,12 +70,13 @@ const SignupPage = () => {
     const avatar = `/images/avatars/avatar${randomAvatarNumber}.svg`;
     try {
       const response = await signup(username, email, password, avatar);
-      localStorage.setItem('token', response.access_token);
+      setToken( response.access_token);
       form.reset(defaultValues);
       toast.success('Profile created successfully, enjoy!');
       navigate('/threads');
     } catch (error) {
       handleError(error);
+      removeToken();
       setUser(null);
     }
   };

@@ -31,12 +31,10 @@ export const router = createBrowserRouter(
         {
           path: '/profile/:id',
           element: <ProfilePage />,
-          children: [
-            {
-              path: 'threads',
-              element: <FeedPage />,
-            },
-          ],
+        },
+        {
+          path: '/profile/:id/threads',
+          element: <FeedPage />,
         },
         {
           path: '/threads',

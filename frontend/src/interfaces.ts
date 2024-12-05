@@ -13,16 +13,16 @@ export interface IUser {
 }
 
 export interface IUserProfile extends IUser {
-  posts: IPost[]
+  posts: number;
   impressions: number;
 }
 
 export interface IPost {
   id: string;
   title: string;
-  body: string;
-  userId: string;
-  user: IUser;
+  content: string;
+  authorId: string;
+  author: IUser;
   image?: string;
   createdAt: Date | string;
   likes?: string[];

@@ -1,5 +1,5 @@
 export { default as Post } from './Comment.tsx';
-export { default as PostsList } from './PostsList.tsx';
+export { default as ThreadsList } from './ThreadsList.tsx';
 export { default as WelcomeText } from './WelcomeText.tsx';
 export { default as Header } from './Header.tsx';
 export { default as Navbar } from './Navbar.tsx';

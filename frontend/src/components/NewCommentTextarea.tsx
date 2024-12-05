@@ -9,7 +9,7 @@ import { Button } from '@ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@ui/form';
 import { Input } from '@ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DUMMY_POSTS, USERS } from '../dummy-data';
+// import { DUMMY_POSTS, USERS } from '../dummy-data';
 
 type Props = {
   postId: string;
@@ -17,9 +17,6 @@ type Props = {
 };
 
 const NewCommentTextarea = ({ postId, commentId }: Props) => {
-  // TODO Fetch AUTHOR data
-  const author = USERS.filter(user => user.id === '101')[0];
-
   const [isOpenEmojis, setIsOpenEmojis] = useState(false);
   const form = useForm<z.infer<typeof newCommentFormSchema>>({
     resolver: zodResolver(newCommentFormSchema),
@@ -27,42 +24,29 @@ const NewCommentTextarea = ({ postId, commentId }: Props) => {
       comment: '',
     },
   });
+  console.log('postId:', postId, 'commentId');
+
   const onSubmit = (values: z.infer<typeof newCommentFormSchema>) => {
-    const post = DUMMY_POSTS.find(post => post.id === postId);
-    if (!post) {
-      console.error('Post not found');
-      return;
-    }
-    const comments = post.comments;
     const newComment = {
-      id: (DUMMY_POSTS.length + 1).toString(),
       body: values.comment,
-      user: author,
       postId,
-      userId: author.id,
       createdAt: new Date().toISOString(),
       commentLikes: [],
       subComments: [],
     };
 
-    if (!comments) {
-      post.comments = [];
-    } else {
-      comments.push(newComment);
-    }
-
-    if (commentId && comments) {
-      const parentComment = comments.find(comment => comment.id === commentId);
-      if (!parentComment) {
-        console.error('Parent comment not found');
-        return;
-      }
-      if (!parentComment.subComments) {
-        parentComment.subComments = [];
-      }
-      parentComment.subComments.push(newComment);
-      form.reset();
-    }
+    // if (commentId && comments) {
+    //   const parentComment = comments.find(comment => comment.id === commentId);
+    //   if (!parentComment) {
+    //     console.error('Parent comment not found');
+    //     return;
+    //   }
+    //   if (!parentComment.subComments) {
+    //     parentComment.subComments = [];
+    //   }
+    //   parentComment.subComments.push(newComment);
+    //   form.reset();
+    // }
   };
 
   const onEmojiClick = (emojiObject: EmojiClickData) => {

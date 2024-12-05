@@ -1,14 +1,15 @@
 import axios from 'axios';
 import { envConfig } from '../../config';
+import useTokenStore from 'src/store/token.store';
 
 const api = axios.create({
-  baseURL: envConfig.apiBaseUrl,
-  // baseURL: envConfig.v2_apiBaseUrl,
+  // baseURL: envConfig.apiBaseUrl,
+  baseURL: envConfig.v2_apiBaseUrl,
 });
 
 api.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token');
+    const { token } = useTokenStore.getState();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,7 +27,7 @@ api.interceptors.response.use(
   error => {
     if (error.response && error.response.status === 401) {
       console.error('Unauthorized! Please log in again.');
-      localStorage.removeItem('token');
+      useTokenStore.getState().removeToken();
     }
     return Promise.reject(error);
   }

@@ -3,10 +3,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { GrEdit } from 'react-icons/gr';
 import { MdOutlineDelete } from 'react-icons/md';
 import { toast } from 'react-toastify';
-import { deleteUser, getUserProfile, updateUser } from 'src/api';
+import { deleteUserProfile, getUserProfile, updateUserProfile } from 'src/api';
 import { handleError } from 'src/helpers/errorHandler';
 import { IUserProfile } from 'src/interfaces';
 import useUserStore from 'src/store/authorized-user.store';
+import useTokenStore from 'src/store/token.store';
 import { Avatar, AvatarImage } from '@ui/avatar';
 import { Button } from '@ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@ui/card';
@@ -40,6 +41,8 @@ const ProfilePage = () => {
   const [profile, setProfile] = useState<IUserProfile | null>(null);
   const [password, setPassword] = useState('');
   const [isSheetOpen, setSheetOpen] = useState(false);
+  const postCount = profile?.posts || 0;
+  const { removeToken } = useTokenStore();
   const id = params.id;
   const authUserId = user?.id;
   const isMyProfile = id == authUserId;
@@ -47,7 +50,7 @@ const ProfilePage = () => {
     username: user?.username as string,
     avatar: user?.avatar as string,
   });
-
+  console.log(profile, 'profile');
   useEffect(() => {
     setUserChangeableData({
       username: user?.username as string,
@@ -66,7 +69,7 @@ const ProfilePage = () => {
       if (userChangeableData.username.length < 2) {
         throw new Error('Username must be at least 2 characters long');
       }
-      const updatedUser = await updateUser(id, userChangeableData);
+      const updatedUser = await updateUserProfile(id, userChangeableData);
       setUser({ ...user, ...updatedUser });
       setProfile(updatedUser);
       toast.success('Profile updated successfully');
@@ -96,11 +99,11 @@ const ProfilePage = () => {
       return;
     }
     try {
-      await deleteUser(authUserId!, password);
+      await deleteUserProfile(authUserId!, password);
       toast.success('Profile deleted successfully');
       setUser(null);
       setProfile(null);
-      localStorage.removeItem('token');
+      removeToken();
       navigate('/signup');
     } catch (error) {
       handleError(error);
@@ -123,7 +126,7 @@ const ProfilePage = () => {
         </div>
         <span>Username: {profile?.username}</span>
         <Link to={`/profile/${id}/threads`} className="hover:underline">
-          <span>Posts: {profile?.posts.length}</span>
+          <span>Posts: {postCount}</span>
         </Link>
         <span>Reactions on their posts: {profile?.impressions}</span>
       </CardContent>

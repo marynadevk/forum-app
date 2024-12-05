@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -21,8 +23,13 @@ export class AuthController {
   }
 
   @Get('/check-username')
-  async checkUsernameUnique(username: string) {
-    return await this.authService.checkUsernameUnique(username);
+  async checkUsernameUnique(@Query('username') username: string) {
+    if (!username) {
+      throw new BadRequestException('Username is required');
+    }
+
+    const user = await this.authService.checkUsernameUnique(username);
+    return { isUnique: !user };
   }
 
   @Post('/login')

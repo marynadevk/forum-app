@@ -7,16 +7,24 @@ import {
   NavigationMenuLink,
 } from '@ui/navigation-menu';
 import useUserStore from '../store/authorized-user.store';
+import { useEffect, useState } from 'react';
+import useTokenStore from 'src/store/token.store';
 
 const Navbar = () => {
   const { user, setUser } = useUserStore();
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const navigate = useNavigate();
+  const { removeToken } = useTokenStore();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    removeToken();
     setUser(null);
     navigate('/');
   };
+
+  useEffect(() => {
+    setIsAuthorized(!!user);
+  }, [user]);
 
   const TABS_AUTHORIZED = [
     { label: 'Threads', href: '/threads' },
@@ -33,7 +41,7 @@ const Navbar = () => {
     { label: 'Sign up', href: '/signup', action: undefined },
   ];
 
-  const TABS = user ? TABS_AUTHORIZED : TABS_UNAUTHORIZED;
+  const TABS = isAuthorized ? TABS_AUTHORIZED : TABS_UNAUTHORIZED;
   return (
     <NavigationMenu>
       <NavigationMenuList>
