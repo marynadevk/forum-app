@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePostDto } from '../dtos/create-post.dto';
+import { CreatePostDto } from '../../dtos/post/create-post.dto';
 import { UserService } from 'src/user/v1/user.service.v1';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,16 +11,16 @@ export class PostV2Service {
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
-  async getPostById(postId: string) {
-    const post = await this.postRepository.findOne({ where: { id: +postId } });
+  async getPostById(postId: number) {
+    const post = await this.postRepository.findOne({ where: { id: postId } });
     if (!post) {
       throw new NotFoundException(`Post not found`);
     }
 
     const { id } = post.author;
-    const author = await this.userService.getUserById(id.toString());
+    const author = await this.userService.getUserById(id);
 
     return {
       ...post,
@@ -79,14 +79,13 @@ export class PostV2Service {
   }
   async editPost(body: any) {
     const { postId, authorId, ...updateData } = body;
-    const id = +postId;
     const author = await this.userService.getUserById(authorId);
     if (!author) {
       throw new NotFoundException(`User not found`);
     }
 
     const existingPost = await this.postRepository.findOne({
-      where: { id },
+      where: { id: postId },
       relations: ['author'],
     });
     if (!existingPost) {
@@ -98,16 +97,16 @@ export class PostV2Service {
     return await this.postRepository.save(existingPost);
   }
 
-  async deletePost(postId: string, userId: string) {
+  async deletePost(id: number, userId: number) {
     const post = await this.postRepository.findOne({
-      where: { id: +postId },
+      where: { id },
       relations: ['author'],
     });
     if (!post) {
       throw new NotFoundException(`Post not found`);
     }
 
-    if (post.author.id !== +userId) {
+    if (post.author.id !== userId) {
       throw new NotFoundException(`User not allowed to delete this post`);
     }
     return await this.postRepository.remove(post);

@@ -3,15 +3,15 @@ import { EditUserProfileDto } from '../dtos/edit-user-profile.dto';
 import * as bcrypt from 'bcryptjs';
 import { UserService } from 'src/user/v1/user.service.v1';
 import { DeleteProfileDto } from '../dtos/delete-user-profile.dto';
-import { PostService } from 'src/post/v1/post.service.v1';
+import { PostService } from 'src/post/v1/post/post.service.v1';
 
 @Injectable()
 export class UserProfileService {
   constructor(
     private readonly userService: UserService,
     private readonly postService: PostService,
-  ) {}
-  async getUsersProfile(userId: string) {
+  ) { }
+  async getUsersProfile(userId: number) {
     const user = await this.userService.getUserById(userId);
     if (!user) {
       throw new NotFoundException(`User's profile not found`);
@@ -31,7 +31,7 @@ export class UserProfileService {
     };
   }
 
-  async updateProfile(userId: string, body: EditUserProfileDto) {
+  async updateProfile(userId: number, body: EditUserProfileDto) {
     const user = await this.userService.updateUser(userId, body);
 
     return {
@@ -41,7 +41,7 @@ export class UserProfileService {
     };
   }
 
-  async deleteProfile(userId: string, @Body() body: DeleteProfileDto) {
+  async deleteProfile(userId: number, @Body() body: DeleteProfileDto) {
     const user = await this.userService.getUserById(userId);
     if (!user) {
       throw new NotFoundException(`User's profile not found`);

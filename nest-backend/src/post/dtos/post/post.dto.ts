@@ -1,8 +1,9 @@
 export class PostDto {
-  id: string;
+  id: number;
   title: string;
   content: string;
-  authorId: string;
+  authorId: number;
   createdAt: Date;
   image?: string;
+  comments?: any[];
 }

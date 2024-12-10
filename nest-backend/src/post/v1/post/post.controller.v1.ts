@@ -4,20 +4,21 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePostDto } from '../dtos/create-post.dto';
+import { CreatePostDto } from '../../dtos/post/create-post.dto';
+import { PostService } from './post.service.v1';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { EditPostDto } from '../dtos/edit-post.dto';
-import { PostV2Service } from './post.service.v2';
+import { EditPostDto } from '../../dtos/post/edit-post.dto';
 
-@Controller('/v2/post')
-export class PostV2Controller {
-  constructor(private readonly postService: PostV2Service) {}
+@Controller('/v1/post')
+export class PostController {
+  constructor(private readonly postService: PostService) {}
 
   @Get()
   async getAllPosts(
@@ -29,7 +30,7 @@ export class PostV2Controller {
 
   @Get('/author/:authorId')
   async getPostsByAuthorId(
-    @Param('authorId') authorId: string,
+    @Param('authorId', ParseIntPipe) authorId: number,
     @Query('page') page: number,
     @Query('limit') limit: number,
   ) {
@@ -37,7 +38,7 @@ export class PostV2Controller {
   }
 
   @Get(':postId')
-  async getPostById(@Param('postId') postId: string) {
+  async getPostById(@Param('postId', ParseIntPipe) postId: number) {
     return await this.postService.getPostById(postId);
   }
 
@@ -53,7 +54,7 @@ export class PostV2Controller {
   @Put(':postId')
   async editPost(
     @Request() req,
-    @Param('postId') postId: string,
+    @Param('postId', ParseIntPipe) postId: number,
     @Body() body: EditPostDto,
   ) {
     const { userId } = req.user;
@@ -64,7 +65,10 @@ export class PostV2Controller {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':postId')
-  async deletePost(@Request() req, @Param('postId') postId: string) {
+  async deletePost(
+    @Request() req,
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
     const { userId } = req.user;
     return await this.postService.deletePost(postId, userId);
   }

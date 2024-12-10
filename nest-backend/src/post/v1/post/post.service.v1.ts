@@ -1,18 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePostDto } from '../dtos/create-post.dto';
+import { CreatePostDto } from '../../dtos/post/create-post.dto';
 import { PostDao } from './post.dao.v1';
 import { UserService } from 'src/user/v1/user.service.v1';
-import { EditPostDto } from '../dtos/edit-post.dto';
-import { GetPostsDto } from '../dtos/get-posts.dto';
+import { EditPostDto } from '../../dtos/post/edit-post.dto';
+import { GetPostsDto } from '../../dtos/post/get-posts.dto';
+import { CommentService } from 'src/post/v1/comment/comment.service.v1';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postDao: PostDao,
     private readonly userService: UserService,
+    private readonly commentService: CommentService,
   ) {}
 
-  async getPostById(postId: string) {
+  async getPostById(postId: number) {
     const post = await this.postDao.getPostById(postId);
     if (!post) {
       throw new NotFoundException(`Post not found`);
@@ -20,10 +22,11 @@ export class PostService {
 
     const authorId = post.authorId;
     const author = await this.userService.getUserById(authorId);
-
+    const comments = await this.commentService.getPostComments(postId, 5);
     return {
       ...post,
       author,
+      comments,
     };
   }
 
@@ -101,7 +104,7 @@ export class PostService {
     });
   }
 
-  async deletePost(postId: string, userId: string) {
+  async deletePost(postId: number, userId: number) {
     const post = await this.getPostById(postId);
     if (!post) {
       throw new NotFoundException(`Post not found`);

@@ -8,6 +8,7 @@ import {
   Request,
   Get,
   ForbiddenException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UserProfileV2Service } from './userProfile.service.v2';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -19,8 +20,11 @@ import { DeleteProfileDto } from '../dtos/delete-user-profile.dto';
 export class UserProfileV2Controller {
   constructor(private userService: UserProfileV2Service) {}
   @Get(':id')
-  async getUsersProfile(@Param('id') id: string, @Request() req): Promise<any> {
-    if (+id !== req.user.userId) {
+  async getUsersProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ): Promise<any> {
+    if (id !== req.user.userId) {
       throw new ForbiddenException('Please login to view this profile');
     }
     return await this.userService.getUsersProfile(id);
@@ -28,11 +32,11 @@ export class UserProfileV2Controller {
 
   @Put(':id')
   async updateProfile(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: EditUserProfileDto,
     @Request() req,
   ): Promise<any> {
-    if (+id !== req.user.userId) {
+    if (id !== req.user.userId) {
       throw new ForbiddenException(
         'You are not allowed to update this profile',
       );
@@ -42,11 +46,11 @@ export class UserProfileV2Controller {
 
   @Delete(':id')
   async deleteProfile(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: DeleteProfileDto,
     @Request() req,
-  ): Promise<{ message: string; id: string }> {
-    if (+id !== req.user.userId) {
+  ): Promise<{ message: string; id: number }> {
+    if (id !== req.user.userId) {
       throw new ForbiddenException(
         'You are not allowed to delete this profile',
       );

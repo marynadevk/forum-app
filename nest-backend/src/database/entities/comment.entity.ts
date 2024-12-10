@@ -15,21 +15,30 @@ import { Post } from './post.entity';
 export class Comment {
   @PrimaryGeneratedColumn()
   id: number;
+
   @ManyToOne(() => User, (user) => user.id)
   author: User;
+
   @Column()
   content: string;
-  @ManyToOne(() => Post, (post) => post.id)
+
+  @ManyToOne(() => Post, (post) => post.comments, { nullable: true })
   post: Post;
-  @ManyToOne(() => Comment, (comment) => comment.id, { nullable: true })
-  parentComment: Comment;
-  @OneToMany(() => Comment, (comment) => comment.parentComment.id, {
-    cascade: true,
+
+  @ManyToOne(() => Comment, (comment) => comment.comments, {
     nullable: true,
+    onDelete: 'CASCADE',
+  })
+  parentComment: Comment;
+
+  @OneToMany(() => Comment, (comment) => comment.parentComment, {
+    cascade: true,
   })
   comments: Comment[];
+
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
   @ManyToMany(() => User, { nullable: true })
   @JoinTable()
   likes: User[];

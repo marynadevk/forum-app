@@ -6,7 +6,7 @@ import { EntityManager } from 'typeorm';
 export class UserDao {
   constructor(private readonly entityManager: EntityManager) {}
 
-  async findUserById(userId: string): Promise<User> {
+  async findUserById(userId: number): Promise<User> {
     const query = `SELECT * FROM public.user WHERE id = $1`;
     const result = await this.entityManager.query(query, [userId]);
 
@@ -29,7 +29,7 @@ export class UserDao {
     return result.length > 0 ? result[0][0] : null;
   }
 
-  async deleteUser(userId: string): Promise<any[]> {
+  async deleteUser(userId: number): Promise<any[]> {
     const query = `DELETE FROM public.user WHERE id = $1 RETURNING *`;
     const result = await this.entityManager.query(query, [userId]);
     return result.length > 0 ? result[0] : null;

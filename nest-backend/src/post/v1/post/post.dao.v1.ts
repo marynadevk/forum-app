@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 import { Post } from 'src/database/entities/post.entity';
-import { PostDto } from '../dtos/post.dto';
+import { PostDto } from '../../dtos/post/post.dto';
 
 @Injectable()
 export class PostDao {
-  constructor(private readonly entityManager: EntityManager) {}
+  constructor(private readonly entityManager: EntityManager) { }
   async savePost(postData: Post) {
     const { title, content, author, image } = postData;
     const query = `INSERT INTO public.post (title, content, "authorId", image) VALUES ($1, $2, $3, $4) RETURNING *`;
@@ -18,7 +18,7 @@ export class PostDao {
     ]);
     return result[0];
   }
-  async getPostById(postId: string): Promise<PostDto> {
+  async getPostById(postId: number): Promise<PostDto> {
     const query = `SELECT * FROM public.post WHERE id = $1`;
     const result = await this.entityManager.query(query, [postId]);
 
@@ -26,7 +26,7 @@ export class PostDao {
   }
 
   async getPostsByAuthorId(
-    authorId: string,
+    authorId: number,
     limit: number,
     offset: number,
   ): Promise<Post[]> {
@@ -39,7 +39,7 @@ export class PostDao {
     return await this.entityManager.query(query, [authorId, limit, offset]);
   }
 
-  async countPostsByAuthorId(authorId: string) {
+  async countPostsByAuthorId(authorId: number) {
     const query = `SELECT COUNT(*) as total FROM public.post WHERE "authorId" = $1`;
     const result = await this.entityManager.query(query, [authorId]);
     return parseInt(result[0].total, 10);
@@ -77,7 +77,7 @@ export class PostDao {
     return result[0];
   }
 
-  async deletePost(postId: string) {
+  async deletePost(postId: number) {
     const query = `DELETE FROM public.post WHERE id = $1 RETURNING *`;
     const result = await this.entityManager.query(query, [postId]);
     return result.length > 0 ? result[0] : null;

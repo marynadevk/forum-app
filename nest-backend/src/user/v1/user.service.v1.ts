@@ -4,7 +4,7 @@ import { UserDao } from './user.dao.v1';
 @Injectable()
 export class UserService {
   constructor(private readonly userDao: UserDao) {}
-  async getUserById(userId: string) {
+  async getUserById(userId: number) {
     const user = await this.userDao.findUserById(userId);
     if (!user) {
       throw new NotFoundException(`User's profile not found`);
@@ -12,7 +12,7 @@ export class UserService {
     return user;
   }
 
-  async updateUser(id: string, body: any) {
+  async updateUser(id: number, body: any) {
     const usernameExists = await this.userDao.findUserByUsername(body.username);
     if (usernameExists) {
       throw new NotFoundException(`Username already exists`);
@@ -27,8 +27,8 @@ export class UserService {
     return user;
   }
 
-  async deleteUser(id: string) {
-    const deleteResult = await this.userDao.deleteUser(id.toString());
+  async deleteUser(id: number) {
+    const deleteResult = await this.userDao.deleteUser(id);
     if (!deleteResult) {
       throw new NotFoundException(`Failed to delete user's profile`);
     } else {

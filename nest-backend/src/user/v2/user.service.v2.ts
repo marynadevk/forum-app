@@ -9,9 +9,9 @@ export class UserV2Service {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-  async getUserById(userId: string) {
+  async getUserById(id: number) {
     const user = await this.userRepository.findOne({
-      where: { id: +userId },
+      where: { id },
     });
 
     if (!user) {
@@ -20,7 +20,7 @@ export class UserV2Service {
     return user;
   }
 
-  async updateUser(id: string, body: any) {
+  async updateUser(id: number, body: any) {
     const usernameExists = await this.userRepository.findOne({
       where: { username: body.username },
     });
@@ -31,7 +31,7 @@ export class UserV2Service {
     await this.userRepository.update(id, body);
 
     const updatedUser = await this.userRepository.findOne({
-      where: { id: +id },
+      where: { id },
     });
     if (!updatedUser) {
       throw new NotFoundException(`User's profile not found`);
@@ -40,7 +40,7 @@ export class UserV2Service {
     return updatedUser;
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: number) {
     const deleteResult = await this.userRepository.delete(id);
     if (deleteResult.affected === 0) {
       throw new NotFoundException(`Failed to delete user's profile`);

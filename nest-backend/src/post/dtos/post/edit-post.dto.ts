@@ -1,8 +1,8 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
 export class EditPostDto {
-  authorId: string;
-  postId: string;
+  authorId: number;
+  postId: number;
 
   @IsString()
   @IsNotEmpty()

@@ -4,40 +4,41 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePostDto } from '../dtos/create-post.dto';
-import { PostService } from './post.service.v1';
+import { CreatePostDto } from '../../dtos/post/create-post.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { EditPostDto } from '../dtos/edit-post.dto';
+import { EditPostDto } from '../../dtos/post/edit-post.dto';
+import { PostV2Service } from './post.service.v2';
 
-@Controller('/v1/post')
-export class PostController {
-  constructor(private readonly postService: PostService) {}
+@Controller('/v2/post')
+export class PostV2Controller {
+  constructor(private readonly postService: PostV2Service) {}
 
   @Get()
   async getAllPosts(
-    @Query('page') page: number,
-    @Query('limit') limit: number,
+    @Query('page', ParseIntPipe) page: number,
+    @Query('limit', ParseIntPipe) limit: number,
   ) {
     return await this.postService.getAllPosts({ page, limit });
   }
 
   @Get('/author/:authorId')
   async getPostsByAuthorId(
-    @Param('authorId') authorId: string,
-    @Query('page') page: number,
-    @Query('limit') limit: number,
+    @Param('authorId', ParseIntPipe) authorId: number,
+    @Query('page', ParseIntPipe) page: number,
+    @Query('limit', ParseIntPipe) limit: number,
   ) {
     return await this.postService.getPostsByAuthorId({ authorId, page, limit });
   }
 
   @Get(':postId')
-  async getPostById(@Param('postId') postId: string) {
+  async getPostById(@Param('postId', ParseIntPipe) postId: number) {
     return await this.postService.getPostById(postId);
   }
 
@@ -53,7 +54,7 @@ export class PostController {
   @Put(':postId')
   async editPost(
     @Request() req,
-    @Param('postId') postId: string,
+    @Param('postId', ParseIntPipe) postId: number,
     @Body() body: EditPostDto,
   ) {
     const { userId } = req.user;
@@ -64,7 +65,10 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':postId')
-  async deletePost(@Request() req, @Param('postId') postId: string) {
+  async deletePost(
+    @Request() req,
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
     const { userId } = req.user;
     return await this.postService.deletePost(postId, userId);
   }
