@@ -33,10 +33,11 @@ export interface IComment {
   id: string;
   postId: string;
   commentId?: string;
-  userId: string;
-  user: IUser;
-  body: string;
+  authorId: string;
+  author: IUser;
+  content: string;
   createdAt: Date | string;
   commentLikes?: string[];
   subComments?: IComment[];
+  subCommentsCount?: number;
 }

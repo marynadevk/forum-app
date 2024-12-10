@@ -40,7 +40,7 @@ const FeedPage = () => {
         handleError(error);
       }
     };
-
+    console.log('FeedPage rendered');
     fetchInitialPosts();
   }, [id, posts]);
 

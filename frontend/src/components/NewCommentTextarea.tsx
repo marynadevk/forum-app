@@ -1,57 +1,58 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Picker, { EmojiClickData } from 'emoji-picker-react';
 import { AiOutlineSend } from 'react-icons/ai';
 import { BsEmojiSmile } from 'react-icons/bs';
+import { createComment } from 'src/api';
+import { handleError } from 'src/helpers/errorHandler';
+import { IComment } from 'src/interfaces';
 import { z } from 'zod';
 import { newCommentFormSchema } from '@schemas/newCommentFormSchema';
 import { Button } from '@ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@ui/form';
 import { Input } from '@ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
-// import { DUMMY_POSTS, USERS } from '../dummy-data';
 
 type Props = {
-  postId: string;
+  postId?: string;
   commentId?: string;
+  setSubComments?: React.Dispatch<React.SetStateAction<IComment[] | null>>;
 };
 
-const NewCommentTextarea = ({ postId, commentId }: Props) => {
+const NewCommentTextarea = ({ postId, commentId, setSubComments }: Props) => {
   const [isOpenEmojis, setIsOpenEmojis] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
   const form = useForm<z.infer<typeof newCommentFormSchema>>({
     resolver: zodResolver(newCommentFormSchema),
     defaultValues: {
       comment: '',
     },
   });
-  console.log('postId:', postId, 'commentId');
 
-  const onSubmit = (values: z.infer<typeof newCommentFormSchema>) => {
-    const newComment = {
-      body: values.comment,
-      postId,
-      createdAt: new Date().toISOString(),
-      commentLikes: [],
-      subComments: [],
-    };
-
-    // if (commentId && comments) {
-    //   const parentComment = comments.find(comment => comment.id === commentId);
-    //   if (!parentComment) {
-    //     console.error('Parent comment not found');
-    //     return;
-    //   }
-    //   if (!parentComment.subComments) {
-    //     parentComment.subComments = [];
-    //   }
-    //   parentComment.subComments.push(newComment);
-    //   form.reset();
-    // }
+  const onSubmit = async (values: z.infer<typeof newCommentFormSchema>) => {
+    try {
+      if (postId) {
+        await createComment({
+          content: values.comment,
+          postId,
+        });
+      } else if (commentId) {
+        const comment = await createComment({content: values.comment, commentId});
+        if (setSubComments) {
+          setSubComments(prev => [...(prev || []), comment]);
+        }
+      }
+      form.reset();
+    } catch (error) {
+      handleError(error);
+    }
   };
 
   const onEmojiClick = (emojiObject: EmojiClickData) => {
     const currentContent = form.getValues('comment');
     form.setValue('comment', currentContent + emojiObject.emoji);
+    setIsOpenEmojis(false);
   };
 
   return (
@@ -84,17 +85,33 @@ const NewCommentTextarea = ({ postId, commentId }: Props) => {
           >
             <BsEmojiSmile />
           </Button>
-          <Picker
-            style={{
-              position: 'absolute',
-              zIndex: 9999,
-              top: '-100%',
-              left: '25%',
-              width: '300px',
-            }}
-            open={isOpenEmojis}
-            onEmojiClick={onEmojiClick}
-          />
+          {isOpenEmojis && (
+            <div
+              ref={emojiPickerRef}
+              className="absolute z-50 bg-white shadow-md rounded-md p-1"
+              style={{
+                top: '-170px',
+                left: '150px',
+              }}
+            >
+              <Picker
+                className="overflow-y-auto"
+                skinTonesDisabled
+                style={
+                  {
+                    '--epr-emoji-size': '20px',
+                  } as React.CSSProperties
+                }
+                width={600}
+                height={150}
+                onEmojiClick={onEmojiClick}
+                searchDisabled
+                previewConfig={{
+                  showPreview: false,
+                }}
+              />
+            </div>
+          )}
         </div>
       </form>
     </Form>

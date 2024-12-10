@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@ui/card';
 
 const WelcomeText = () => {
   return (
-    <Card className="w-full">
+    <Card className="w-full m-0">
       <CardHeader>
         <CardTitle>Welcome to the Floral Haven! 🌸🌿</CardTitle>
       </CardHeader>

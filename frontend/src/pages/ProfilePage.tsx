@@ -50,7 +50,7 @@ const ProfilePage = () => {
     username: user?.username as string,
     avatar: user?.avatar as string,
   });
-  console.log(profile, 'profile');
+
   useEffect(() => {
     setUserChangeableData({
       username: user?.username as string,

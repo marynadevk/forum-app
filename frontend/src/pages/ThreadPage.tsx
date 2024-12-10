@@ -22,10 +22,12 @@ const ThreadPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState({ title: '', content: '' });
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!id) return;
     getThread(id).then(setPost);
   }, [id]);
+
   if (!post) return <div>Post not found</div>;
 
   const { title, content, author, image, createdAt, likes, comments } = post;
@@ -77,7 +79,7 @@ const ThreadPage = () => {
               {isEditing ? (
                 <EditContent
                   editContent={editContent}
-                  setEditContent={setEditContent}
+                  setEditPost={setEditContent}
                   onSave={handleSaveContent}
                 />
               ) : (

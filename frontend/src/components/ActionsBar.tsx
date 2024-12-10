@@ -9,8 +9,10 @@ import ConfirmationWindow from './ConfirmationWindow';
 type Props = {
   authorId: string;
   likes?: string[];
-  comments?: IComment[];
+  comments?: IComment[] | null;
+  subCommentsCount?: number;
   setAddComment?: React.Dispatch<React.SetStateAction<boolean>>;
+  viewSubComments?: () => void;
   addComment?: boolean;
   onEditContent?: () => void;
   onDeleteContent?: () => void;
@@ -24,8 +26,10 @@ const ActionsBar = ({
   setAddComment,
   addComment,
   onEditContent,
+  viewSubComments,
   onDeleteContent,
   isEditing,
+  subCommentsCount,
 }: Props) => {
   const { user } = useUserStore();
   const isMyLike = likes?.includes(user?.id as string);
@@ -48,10 +52,10 @@ const ActionsBar = ({
             <GoHeart size="20px" />
           )}
         </button>
-        <button className="flex gap-2 items-center w-max text-sm">
-          {comments && (
+        <button className="flex gap-2 items-center w-max text-sm" onClick={viewSubComments}>
+          {(comments || subCommentsCount as number > 0) && (
             <>
-              {comments?.length} <FaRegComment size="20px" />
+              {comments?.length || subCommentsCount} <FaRegComment size="20px" />
             </>
           )}
         </button>

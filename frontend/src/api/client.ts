@@ -3,8 +3,8 @@ import { envConfig } from '../../config';
 import useTokenStore from 'src/store/token.store';
 
 const api = axios.create({
-  // baseURL: envConfig.apiBaseUrl,
-  baseURL: envConfig.v2_apiBaseUrl,
+  baseURL: envConfig.apiBaseUrl,
+  // baseURL: envConfig.v2_apiBaseUrl,
 });
 
 api.interceptors.request.use(

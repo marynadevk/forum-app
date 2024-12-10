@@ -2,19 +2,28 @@ import { Button } from './ui/button';
 
 type Props = {
   editContent: { title: string; content: string };
-  setEditContent: React.Dispatch<
+  setEditPost?: React.Dispatch<
     React.SetStateAction<{ title: string; content: string }>
   >;
+  setEditComment?: React.Dispatch<React.SetStateAction<string>>;
   onSave: () => void;
 };
 
-const EditContent = ({ editContent, setEditContent, onSave }: Props) => {
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditContent(prev => ({ ...prev, title: e.target.value }));
-  };
-
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditContent(prev => ({ ...prev, content: e.target.value }));
+const EditContent = ({
+  editContent,
+  setEditPost,
+  onSave,
+  setEditComment,
+}: Props) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    if (setEditPost) {
+      setEditPost(prev => ({ ...prev, [name]: value }));
+    } else if (setEditComment) {
+      setEditComment(value);
+    }
   };
 
   return (
@@ -22,14 +31,14 @@ const EditContent = ({ editContent, setEditContent, onSave }: Props) => {
       <input
         type="text"
         value={editContent.title}
-        onChange={handleTitleChange}
+        onChange={handleInputChange}
         placeholder="Edit title"
         className="border p-2 rounded w-full bg-white"
       />
       <textarea
         rows={5}
         value={editContent.content}
-        onChange={handleContentChange}
+        onChange={handleInputChange}
         placeholder="Edit content"
         className="border p-2 rounded w-full h-32 resize-none bg-white"
       />
