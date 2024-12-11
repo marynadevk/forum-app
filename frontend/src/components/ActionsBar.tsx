@@ -16,6 +16,7 @@ type Props = {
   addComment?: boolean;
   onEditContent?: () => void;
   onDeleteContent?: () => void;
+  onLikeContent?: () => void;
   isEditing?: boolean;
 };
 
@@ -30,6 +31,7 @@ const ActionsBar = ({
   onDeleteContent,
   isEditing,
   subCommentsCount,
+  onLikeContent,
 }: Props) => {
   const { user } = useUserStore();
   const isMyLike = likes?.includes(user?.id as string);
@@ -44,7 +46,10 @@ const ActionsBar = ({
   return (
     <div className="flex justify-between w-full">
       <div className="flex gap-5">
-        <button className="flex gap-2 items-center w-12 text-sm">
+        <button
+          className={`flex gap-2 items-center w-12 text-sm ${isMyContent ? 'cursor-not-allowed opacity-50' : ''}`}
+          onClick={onLikeContent}
+        >
           {likes?.length}{' '}
           {isMyLike ? (
             <FcLikePlaceholder size="20px" />
@@ -52,10 +57,14 @@ const ActionsBar = ({
             <GoHeart size="20px" />
           )}
         </button>
-        <button className="flex gap-2 items-center w-max text-sm" onClick={viewSubComments}>
-          {(comments || subCommentsCount as number > 0) && (
+        <button
+          className="flex gap-2 items-center w-max text-sm"
+          onClick={viewSubComments}
+        >
+          {(comments || (subCommentsCount as number) > 0) && (
             <>
-              {comments?.length || subCommentsCount} <FaRegComment size="20px" />
+              {comments?.length || subCommentsCount}{' '}
+              <FaRegComment size="20px" />
             </>
           )}
         </button>

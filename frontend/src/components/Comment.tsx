@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { deleteComment, getSubComments, updateComment } from 'src/api/comments';
+import { deleteComment, getSubComments, likeComment, unlikeComment, updateComment } from 'src/api/comments';
 import { computeCommentStyles } from 'src/helpers/computeCommentStyles';
 import { handleError } from 'src/helpers/errorHandler';
 import { Card, CardContent, CardFooter } from '@ui/card';
@@ -12,6 +12,7 @@ import {
 } from '@components/index';
 import { IComment, IUser } from '../interfaces';
 import EditContent from './EditContent';
+import useUserStore from 'src/store/authorized-user.store';
 
 type Props = {
   comment: IComment;
@@ -22,7 +23,10 @@ const Comment = ({ comment, level = 0 }: Props) => {
   const [addComment, setAddComment] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [subComments, setSubComments] = useState<IComment[] | null>(null);
-  const [editContent, setEditContent] = useState('');
+  const [editContent, setEditContent] = useState({ content: '' });
+  const [likes, setLikes] = useState<string[]>(comment.likes || []);
+
+  const {user} = useUserStore();
 
   const {
     id,
@@ -30,8 +34,7 @@ const Comment = ({ comment, level = 0 }: Props) => {
     authorId,
     content,
     createdAt,
-    commentLikes,
-    subCommentsCount,
+    subCommentsCount
   } = comment;
 
   const loadSubComments = async () => {
@@ -44,7 +47,7 @@ const Comment = ({ comment, level = 0 }: Props) => {
   };
 
   const handleEditContent = () => {
-    setEditContent(content);
+    setEditContent({ content });
     setIsEditing(!isEditing);
   };
 
@@ -60,7 +63,24 @@ const Comment = ({ comment, level = 0 }: Props) => {
     try {
       await updateComment(id as string, editContent);
       setIsEditing(false);
-      setEditContent('');
+      setEditContent({ content: '' });
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const handleLikeContent = async () => {
+    try {
+      if (likes && user) {
+        const isLiked = likes.includes(user?.id);
+        if (isLiked) {
+          await unlikeComment(id as string);
+          setLikes(prev => (prev.filter(like => like !== user?.id) || []));
+        } else {
+          await likeComment(id as string);
+          setLikes(prev => [...prev, user?.id]);
+        }
+      }
     } catch (error) {
       handleError(error);
     }
@@ -93,13 +113,15 @@ const Comment = ({ comment, level = 0 }: Props) => {
         <ActionsBar
           setAddComment={setAddComment}
           authorId={authorIdToUse}
-          likes={commentLikes}
+          likes={likes}
           comments={subComments}
           addComment={addComment}
           viewSubComments={loadSubComments}
           subCommentsCount={subCommentsCount || 0}
           isEditing={isEditing}
           onEditContent={handleEditContent}
+          onDeleteContent={handleDeleteContent}
+          onLikeContent={handleLikeContent}
         />
         {addComment && (
           <NewCommentTextarea setSubComments={setSubComments} commentId={id} />

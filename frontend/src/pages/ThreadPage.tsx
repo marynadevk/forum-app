@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { deleteThread, getThread, updateThread } from 'src/api/threads';
+import {
+  deleteThread,
+  getThread,
+  likeThread,
+  unlikeThread,
+  updateThread,
+} from 'src/api/threads';
 import { handleError } from 'src/helpers/errorHandler';
+import useUserStore from 'src/store/authorized-user.store';
 import { Card, CardHeader, CardContent, CardFooter } from '@ui/card';
 import { Separator } from '@ui/separator';
 import EditContent from '@components/EditContent';
@@ -22,6 +29,7 @@ const ThreadPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState({ title: '', content: '' });
   const navigate = useNavigate();
+  const { user } = useUserStore();
 
   useEffect(() => {
     if (!id) return;
@@ -60,6 +68,28 @@ const ThreadPage = () => {
       handleError(error);
     }
   };
+  const handleLikeContent = async () => {
+    try {
+      if (post.likes && user) {
+        const isLiked = post?.likes.includes(user?.id);
+        if (isLiked) {
+          await unlikeThread(id as string);
+          setPost(prev => ({
+            ...prev!,
+            likes: prev?.likes?.filter(like => like !== user?.id) || [],
+          }));
+        } else {
+          await likeThread(id as string);
+          setPost(prev => ({
+            ...prev!,
+            likes: prev?.likes ? [...prev.likes, user?.id] : [user?.id],
+          }));
+        }
+      }
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
   return (
     <div className="">
@@ -79,7 +109,7 @@ const ThreadPage = () => {
               {isEditing ? (
                 <EditContent
                   editContent={editContent}
-                  setEditPost={setEditContent}
+                  setEditContent={setEditContent}
                   onSave={handleSaveContent}
                 />
               ) : (
@@ -103,6 +133,7 @@ const ThreadPage = () => {
             setAddComment={setAddComment}
             onEditContent={handleEditContent}
             onDeleteContent={handleDeleteContent}
+            onLikeContent={handleLikeContent}
             isEditing={isEditing}
           />
           {addComment && <NewCommentTextarea postId={id as string} />}

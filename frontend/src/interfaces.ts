@@ -37,7 +37,7 @@ export interface IComment {
   author: IUser;
   content: string;
   createdAt: Date | string;
-  commentLikes?: string[];
+  likes?: string[];
   subComments?: IComment[];
   subCommentsCount?: number;
 }
