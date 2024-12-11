@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2021",
     "useDefineForClassFields": true,
     "module": "commonjs",
     "skipLibCheck": true,
@@ -17,8 +17,24 @@
 
     /* Linting */
     "strict": true,
+    "strictNullChecks": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
-  }
+    "noFallthroughCasesInSwitch": true,
+    "strictPropertyInitialization": false,
+
+    /* Path Aliases */
+    "baseUrl": "./src",
+
+    /* Production Settings */
+    "noEmitOnError": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    /* Environment */
+    "lib": ["es2020", "dom"],
+    "types": ["node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
