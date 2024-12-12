@@ -3,9 +3,10 @@ import { Request, Response } from 'express';
 
 class AuthController {
   async checkUsernameUnique(req: Request, res: Response) {
-    const { username } = req.params;
-    const exists = await AuthService.checkUsernameUnique(username);
-    res.json({ exists });
+    const { username } = req.query;
+    
+    const exists = await AuthService.checkUsernameUnique(username as string);
+    res.json({ isUnique: !exists });
   }
 
   async signup(req: Request, res: Response) {

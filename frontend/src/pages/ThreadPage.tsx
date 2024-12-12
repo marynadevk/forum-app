@@ -21,6 +21,7 @@ import {
   UserLink,
 } from '@components/index';
 import { IPost, IUser } from '../interfaces';
+import { toast } from 'react-toastify';
 
 const ThreadPage = () => {
   const { id } = useParams();
@@ -38,6 +39,7 @@ const ThreadPage = () => {
 
   if (!post) return <div>Post not found</div>;
 
+  console.log(post);
   const { title, content, author, image, createdAt, likes, comments } = post;
 
   const handleEditContent = () => {
@@ -47,9 +49,10 @@ const ThreadPage = () => {
 
   const handleDeleteContent = async () => {
     try {
-      await deleteThread(id as string);
+      const response = await deleteThread(id as string);
       setPost(null);
       navigate('/threads');
+      toast.success(response.message);
     } catch (error) {
       handleError(error);
     }
@@ -90,6 +93,8 @@ const ThreadPage = () => {
       handleError(error);
     }
   };
+
+  console.log(post);
 
   return (
     <div className="">

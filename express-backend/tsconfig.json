@@ -23,9 +23,6 @@
     "noFallthroughCasesInSwitch": true,
     "strictPropertyInitialization": false,
 
-    /* Path Aliases */
-    "baseUrl": "./src",
-
     /* Production Settings */
     "noEmitOnError": true,
     "declaration": true,

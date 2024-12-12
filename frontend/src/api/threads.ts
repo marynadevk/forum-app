@@ -26,6 +26,7 @@ export const updateThread = async (threadId: string, data: any) => {
 };
 
 export const deleteThread = async (threadId: string) => {
+  console.log('threadId', threadId);
   const response = await api.delete(`/post/${threadId}`);
   return response.data;
 };

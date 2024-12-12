@@ -19,11 +19,11 @@ const ThreadsList = ({ posts }: Props) => {
   const handleReadMore = (id: string) => {
     navigate(`/threads/${id}`);
   };
-
+console.log(posts);
   return (
     <div className="flex flex-col gap-3">
       {posts.map(({ content, id, createdAt, title }) => (
-        <Card key={id} className="w-full">
+        <Card key={id + createdAt} className="w-full">
           <CardHeader>
             <CardTitle>{title}</CardTitle>
             <CardDescription>

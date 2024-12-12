@@ -1,0 +1,1 @@
+export class PaginatedPostsDTO { page?: number; limit?: number; authorId?: string; }

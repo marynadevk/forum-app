@@ -92,6 +92,7 @@ const SignupPage = () => {
     }
 
     const isUnique = await checkUsernameUnique(username);
+    console.log(isUnique, 'isUnique');
     if (!isUnique) {
       form.setError('username', {
         type: 'manual',

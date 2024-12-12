@@ -3,6 +3,9 @@ import { envConfig } from './config';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import authRouter from './router/auth';
+import postRouter from './router/post';
+import profileRouter from './router/profile';
+import commentRouter from './router/comment';
 
 const app = express();
 
@@ -14,6 +17,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(authRouter);
+app.use(postRouter);
+app.use(profileRouter);
+app.use(commentRouter);
+
 
 const startServer = async () => {
   await mongoose.connect(envConfig.dbUrl as string);

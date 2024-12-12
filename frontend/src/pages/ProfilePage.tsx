@@ -58,6 +58,8 @@ const ProfilePage = () => {
     });
   }, [user]);
 
+  console.log('PROFILE', user);
+
   useEffect(() => {
     if (!id) return;
     getUserProfile(id).then(setProfile);
