@@ -2,23 +2,20 @@ import Post from '../models/post.schema';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import userService from './user.service';
 import { PaginatedPostsDTO } from '../dtos/paginated-posts.dto';
+import commentService from './comment.service';
 
 
 class PostService {
   async getPostById(id: string) {
-    const post = await Post.findById({ _id: id }).populate('author');
+    const post = await Post.findById({ _id: id }).populate('author', 'id username avatar');
     if (!post) {
       throw new Error('Post not found');
     }
-    const author = await userService.getUserById(post.author._id.toString());
+    const comments = await commentService.getPostComments(id);
 
     return {
       ...post.toObject(),
-      author: {
-        username: author.username,
-        avatar: author.avatar,
-        id: author._id,
-      }
+      comments,
     };
   }
 
@@ -63,18 +60,15 @@ class PostService {
   async getPosts({ page = 1, limit = 4 }: PaginatedPostsDTO) {
     const offset = (page - 1) * limit;
 
-    const postsData = await Post.find()
+    const posts = await Post.find()
       .sort({ createdAt: -1 })
       .skip(offset)
       .limit(limit);
-    if (!postsData || postsData.length === 0) {
+    if (!posts || posts.length === 0) {
       throw new Error(`Posts not found`);
     }
 
     const totalPosts = await Post.countDocuments();
-    const posts = postsData.map((post) => {
-      return { ...post.toObject(), id: post._id }
-    });
     return {
       data: posts,
       total: totalPosts,

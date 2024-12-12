@@ -34,7 +34,7 @@ class AuthService {
   }
 
   async login(email: string, password: string) {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     if (!user) {
       throw new Error('User with provided email not found');
     }
@@ -43,10 +43,9 @@ class AuthService {
     if (!isPasswordCorrect) {
       throw new Error('Invalid password');
     }
-    const plainUser = user.toObject();
 
     return await tokenService.generateToken(
-      { id: plainUser._id.toString(), email: plainUser.email, username: plainUser.username },
+      { id: user._id.toString(), email: user.email, username: user.username },
     );
   }
 }

@@ -10,8 +10,13 @@ const PostSchema = new Schema<IPost>(
     likes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     image: { type: String },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
 
+PostSchema.virtual('id', { id: this._id });
 const Post = mongoose.model<IPost>('Post', PostSchema);
 export default Post;

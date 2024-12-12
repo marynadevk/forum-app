@@ -8,8 +8,13 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true },
     avatar: { type: String },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
 
+UserSchema.virtual('id', { id: this._id });
 const User = mongoose.model<IUser>('User', UserSchema);
 export default User;

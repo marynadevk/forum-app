@@ -10,8 +10,13 @@ const CommentSchema = new Schema<IComment>(
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
     likes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  },
 );
 
+CommentSchema.virtual('id', { id: this._id });
 const Comment = mongoose.model<IComment>('Comment', CommentSchema);
 export default Comment;

@@ -8,7 +8,6 @@ class UserService {
     if (!user) {
       throw new Error(`User's profile not found`);
     }
-    user.id = user._id;
     return user;
   }
 
