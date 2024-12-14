@@ -25,6 +25,7 @@ const EditContent = ({
       {editContent.title &&
       <input
         type="text"
+        name="title"
         value={editContent.title}
         onChange={handleInputChange}
         placeholder="Edit title"
@@ -32,6 +33,7 @@ const EditContent = ({
       />}
       <textarea
         rows={5}
+        name="content"
         value={editContent.content}
         onChange={handleInputChange}
         placeholder="Edit content"

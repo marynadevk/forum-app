@@ -17,9 +17,15 @@ type Props = {
   postId?: string;
   commentId?: string;
   setSubComments?: React.Dispatch<React.SetStateAction<IComment[] | null>>;
+  onAddComment?: (newComment: IComment, isAdd: boolean) => void;
 };
 
-const NewCommentTextarea = ({ postId, commentId, setSubComments }: Props) => {
+const NewCommentTextarea = ({
+  postId,
+  commentId,
+  setSubComments,
+  onAddComment,
+}: Props) => {
   const [isOpenEmojis, setIsOpenEmojis] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
 
@@ -32,18 +38,23 @@ const NewCommentTextarea = ({ postId, commentId, setSubComments }: Props) => {
 
   const onSubmit = async (values: z.infer<typeof newCommentFormSchema>) => {
     try {
-      if (postId) {
-        await createComment({
+      if (postId && onAddComment) {
+        const newComment = await createComment({
           content: values.comment,
           postId,
         });
+        onAddComment(newComment, true);
+        form.reset();
       } else if (commentId) {
-        const comment = await createComment({content: values.comment, commentId});
+        const comment = await createComment({
+          content: values.comment,
+          commentId,
+        });
         if (setSubComments) {
           setSubComments(prev => [...(prev || []), comment]);
         }
+        form.reset();
       }
-      form.reset();
     } catch (error) {
       handleError(error);
     }

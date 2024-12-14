@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { RiImageAddLine } from 'react-icons/ri';
+import { uploadImageToCloudinary } from 'src/api/cloudinaryApi';
+import { handleError } from 'src/helpers/errorHandler';
 import { Button } from '@ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@ui/dialog';
 import { Input } from '@ui/input';
-import { handleError } from 'src/helpers/errorHandler';
-import { uploadImageToCloudinary } from 'src/api/cloudinaryApi'; 
 
 type Props = {
   setImage: React.Dispatch<React.SetStateAction<string>>;
@@ -46,7 +46,6 @@ const UploadImgBtn = ({ setImage }: Props) => {
     }
   };
 
-
   useEffect(() => {
     if (file) {
       setImage(URL.createObjectURL(file));
@@ -60,8 +59,8 @@ const UploadImgBtn = ({ setImage }: Props) => {
           <RiImageAddLine />
         </Button>
       </DialogTrigger>
-      <DialogContent aria-description=''>
-      <DialogTitle>Upload an Image</DialogTitle>
+      <DialogContent aria-description="">
+        <DialogTitle>Upload an Image</DialogTitle>
         <div className="flex flex-col gap-4">
           <Input type="file" accept="image/*" onChange={handleFileChange} />
           {preview && (

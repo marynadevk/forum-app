@@ -1,6 +1,7 @@
 import { FaCommentMedical, FaCommentSlash, FaRegComment } from 'react-icons/fa';
 import { FcLikePlaceholder } from 'react-icons/fc';
 import { GoHeart } from 'react-icons/go';
+import { toast } from 'react-toastify';
 import useUserStore from 'src/store/authorized-user.store';
 import { Button } from '@ui/button';
 import { IComment } from '../interfaces';
@@ -38,7 +39,11 @@ const ActionsBar = ({
   const isMyContent = user?.id === authorId;
 
   const handleAddComment = () => {
-    if (setAddComment) {
+    if (!user) {
+      toast.warning('You need to be logged in to comment');
+    }
+
+    if (user && setAddComment) {
       setAddComment(prev => !prev);
     }
   };

@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { GrEdit } from 'react-icons/gr';
 import { MdOutlineDelete } from 'react-icons/md';
 import { toast } from 'react-toastify';
@@ -32,12 +32,12 @@ import {
   SheetTrigger,
 } from '@ui/sheet';
 import { SelectAvatar } from '@components/index';
+import NotFoundPage from './NotFoundPage';
 
 const ProfilePage = () => {
   const params = useParams();
   const navigate = useNavigate();
   const { user, setUser } = useUserStore();
-
   const [profile, setProfile] = useState<IUserProfile | null>(null);
   const [password, setPassword] = useState('');
   const [isSheetOpen, setSheetOpen] = useState(false);
@@ -58,23 +58,45 @@ const ProfilePage = () => {
     });
   }, [user]);
 
-  console.log('PROFILE', user);
-
   useEffect(() => {
-    if (!id) return;
-    getUserProfile(id).then(setProfile);
+    const fetchUserProfile = async () => {
+      if (!id) return;
+      try {
+        const profileData = await getUserProfile(id);
+        setProfile(profileData);
+      } catch (error) {
+        handleError(error);
+      }
+    };
+
+    fetchUserProfile();
   }, [id]);
+
+  if (!user) return <NotFoundPage text='Please log in to view the profile page' />;
+
 
   const handleSaveChanges = async () => {
     if (!id) return;
     try {
-      if (userChangeableData.username.length < 2) {
-        throw new Error('Username must be at least 2 characters long');
+      const updatedData: any = {};
+      if (userChangeableData.username !== user?.username) {
+        if (userChangeableData.username.length < 2) {
+          throw new Error('Username must be at least 2 characters long');
+        }
+        updatedData.username = userChangeableData.username;
       }
-      const updatedUser = await updateUserProfile(id, userChangeableData);
-      setUser({ ...user, ...updatedUser });
-      setProfile(updatedUser);
-      toast.success('Profile updated successfully');
+      if (userChangeableData.avatar !== user?.avatar) {
+        updatedData.avatar = userChangeableData.avatar;
+      }
+      if (Object.keys(updatedData).length > 0) {
+        const updatedUser = await updateUserProfile(id, updatedData);
+        setUser({ ...user, ...updatedUser });
+        setProfile(updatedUser);
+        toast.success('Profile updated successfully');
+      } else {
+        toast.info('No changes made');
+      }
+
       setSheetOpen(false);
       return true;
     } catch (error) {
@@ -114,6 +136,8 @@ const ProfilePage = () => {
     }
   };
 
+  const noPostsText = `${profile?.username} hasn't posted anything yet.`;
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -127,9 +151,22 @@ const ProfilePage = () => {
           </Avatar>
         </div>
         <span>Username: {profile?.username}</span>
-        <Link to={`/profile/${id}/threads`} className="hover:underline">
+        {/* {postCount === 0 ? ( */}
+        <Button
+          className="w-max"
+          onClick={() =>
+            postCount === 0
+              ? navigate('/not-found', { state: { text: noPostsText } })
+              : navigate(`/profile/${id}/threads`)
+          }
+        >
           <span>Posts: {postCount}</span>
-        </Link>
+        </Button>
+        {/* ) : (
+          <Link to={`/profile/${id}/threads`} className="hover:underline">
+            <span>Posts: {postCount}</span>
+          </Link>
+        )} */}
         <span>Reactions on their posts: {profile?.impressions}</span>
       </CardContent>
       {isMyProfile && (
@@ -150,18 +187,24 @@ const ProfilePage = () => {
               </SheetHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="username" className="text-right">
+                  <Label htmlFor="avatar" className="text-right">
                     Avatar
                   </Label>
                   <SelectAvatar
-                    setAvatar={setUserChangeableData}
-                    selectedProps={userChangeableData?.avatar}
+                    setAvatar={(newAvatar: string) => {
+                      setUserChangeableData(prev => ({
+                        ...prev,
+                        avatar: newAvatar,
+                      }));
+                    }}
+                    selectedProps={userChangeableData.avatar}
                   />
                   <Avatar>
-                    <AvatarImage src={userChangeableData?.avatar} />
+                    <AvatarImage src={userChangeableData.avatar} />
                   </Avatar>
                 </div>
-                <form className="grid grid-cols-4 items-center gap-4">
+
+                <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="username" className="text-right">
                     Username
                   </Label>
@@ -172,7 +215,7 @@ const ProfilePage = () => {
                     onChange={handleChange}
                     className="col-span-3"
                   />
-                </form>
+                </div>
               </div>
               <SheetFooter>
                 <Button type="button" onClick={handleSaveChanges}>

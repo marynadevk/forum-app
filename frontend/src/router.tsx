@@ -7,6 +7,7 @@ import {
   FeedPage,
   ThreadPage,
   NotificationsPage,
+  NotFoundPage,
 } from '@pages/index';
 import { Layout } from '@components/index';
 
@@ -47,6 +48,10 @@ export const router = createBrowserRouter(
         {
           path: '/threads/:id',
           element: <ThreadPage />,
+        },
+        {
+          path: '*',
+          element: <NotFoundPage />,
         },
       ],
     },

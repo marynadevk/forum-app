@@ -15,7 +15,7 @@ const OptionItem = ({ option, onSelect }: OptionItemProps) => {
   return (
     <div
       className="flex justify-center gap-2 px-4 py-2 hover:bg-neutral-50 cursor-pointer"
-      onClick={(e) => {
+      onClick={e => {
         e.preventDefault();
         e.stopPropagation();
         onSelect(option);
@@ -30,13 +30,8 @@ const OptionItem = ({ option, onSelect }: OptionItemProps) => {
   );
 };
 
-type UserChangeableData = {
-  username: string;
-  avatar: string;
-};
-
 type Props = {
-  setAvatar: (updater: (prev: UserChangeableData) => UserChangeableData) => void;
+  setAvatar: (newAvatar: string) => void;
   selectedProps: string | undefined;
 };
 
@@ -50,10 +45,7 @@ const SelectAvatar = ({ setAvatar, selectedProps }: Props) => {
 
   const handleSelect = (option: { id: number; imgSrc: string }) => {
     setSelected(option);
-    setAvatar((prev) => ({
-      ...prev,
-      avatar: option.imgSrc,
-    }));
+    setAvatar(option.imgSrc);
     setIsOpen(false);
   };
 
@@ -94,3 +86,4 @@ const SelectAvatar = ({ setAvatar, selectedProps }: Props) => {
 };
 
 export default SelectAvatar;
+

@@ -5,3 +5,4 @@ export { default as ProfilePage } from './ProfilePage';
 export { default as FeedPage } from './FeedPage';
 export { default as ThreadPage } from './ThreadPage';
 export { default as NotificationsPage } from './NotificationsPage';
+export { default as NotFoundPage } from './NotFoundPage';

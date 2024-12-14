@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -14,19 +15,27 @@ type Props = {
 };
 
 const ConfirmationWindow = ({ onConfirm, message }: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm();
+    }
+    setIsOpen(false);
+  };
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Delete</Button>
+        <Button onClick={() => setIsOpen(true)}>Delete</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>{message}</DialogHeader>
         <DialogFooter>
-          <Button onClick={onConfirm} type="submit">
+          <Button onClick={handleConfirm} type="submit">
             Yes
           </Button>
           <DialogClose asChild>
-            <Button type="submit"> No</Button>
+            <Button type="submit">No</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

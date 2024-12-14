@@ -1,11 +1,6 @@
 import api from './client';
 
-export const getThreadComments = async (threadId: string) => {
-  const response = await api.get(`/comment/${threadId}`);
-  return response.data;
-}; 
-
-export const getSubComments = async (rootId: string, limit: string) => {
+export const getCommentsTree = async (rootId: string, limit: string) => {
   const response = await api.get('/comment/tree', { params: {rootId, limit}});
   return response.data;
 };

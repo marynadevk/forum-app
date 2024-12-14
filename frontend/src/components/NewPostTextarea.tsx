@@ -73,6 +73,8 @@ const NewPostTextarea = ({ setAddPost, setPosts }: Props) => {
     };
   }, [isOpenEmojis]);
 
+  const { image } = form.getValues();
+
   return (
     <Form {...form}>
       <form
@@ -159,6 +161,7 @@ const NewPostTextarea = ({ setAddPost, setPosts }: Props) => {
               />
             </div>
           )}
+          {image && <div className="text-sm text-pink-700 text-pretty underline">Image uploaded</div>}
         </div>
       </form>
     </Form>

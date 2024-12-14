@@ -1,7 +1,15 @@
 import { useState } from 'react';
-import { deleteComment, getSubComments, likeComment, unlikeComment, updateComment } from 'src/api/comments';
+import { toast } from 'react-toastify';
+import {
+  deleteComment,
+  getCommentsTree,
+  likeComment,
+  unlikeComment,
+  updateComment,
+} from 'src/api/comments';
 import { computeCommentStyles } from 'src/helpers/computeCommentStyles';
 import { handleError } from 'src/helpers/errorHandler';
+import useUserStore from 'src/store/authorized-user.store';
 import { Card, CardContent, CardFooter } from '@ui/card';
 import { Separator } from '@ui/separator';
 import {
@@ -12,34 +20,29 @@ import {
 } from '@components/index';
 import { IComment, IUser } from '../interfaces';
 import EditContent from './EditContent';
-import useUserStore from 'src/store/authorized-user.store';
 
 type Props = {
   comment: IComment;
   level?: number;
+  onUpdatedComment?: (comment: IComment, isRemove: boolean) => void;
 };
 
-const Comment = ({ comment, level = 0 }: Props) => {
+const Comment = ({ comment, level = 0, onUpdatedComment }: Props) => {
   const [addComment, setAddComment] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [subComments, setSubComments] = useState<IComment[] | null>(null);
   const [editContent, setEditContent] = useState({ content: '' });
   const [likes, setLikes] = useState<string[]>(comment.likes || []);
 
-  const {user} = useUserStore();
+  const { user } = useUserStore();
 
-  const {
-    id,
-    author,
-    authorId,
-    content,
-    createdAt,
-    subCommentsCount
-  } = comment;
+  const { id, author, authorId, content, createdAt, subCommentsCount } =
+    comment;
+
 
   const loadSubComments = async () => {
     try {
-      const subComments = await getSubComments(id, '4');
+      const subComments = await getCommentsTree(id, '4');
       setSubComments(subComments);
     } catch (error) {
       handleError(error);
@@ -53,7 +56,12 @@ const Comment = ({ comment, level = 0 }: Props) => {
 
   const handleDeleteContent = async () => {
     try {
-      await deleteComment(id as string);
+      const result = await deleteComment(id as string);
+      if (result && onUpdatedComment) {
+        onUpdatedComment(comment, false);
+      }
+      toast.success(result.message);
+
     } catch (error) {
       handleError(error);
     }
@@ -75,7 +83,7 @@ const Comment = ({ comment, level = 0 }: Props) => {
         const isLiked = likes.includes(user?.id);
         if (isLiked) {
           await unlikeComment(id as string);
-          setLikes(prev => (prev.filter(like => like !== user?.id) || []));
+          setLikes(prev => prev.filter(like => like !== user?.id) || []);
         } else {
           await likeComment(id as string);
           setLikes(prev => [...prev, user?.id]);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   deleteThread,
   getThread,
@@ -20,8 +21,7 @@ import {
   NewCommentTextarea,
   UserLink,
 } from '@components/index';
-import { IPost, IUser } from '../interfaces';
-import { toast } from 'react-toastify';
+import { IComment, IPost, IUser } from '../interfaces';
 
 const ThreadPage = () => {
   const { id } = useParams();
@@ -38,9 +38,33 @@ const ThreadPage = () => {
   }, [id]);
 
   if (!post) return <div>Post not found</div>;
-
-  console.log(post);
   const { title, content, author, image, createdAt, likes, comments } = post;
+
+  // const handleAddComment = (newComment: IComment) => {
+  //   setPost(prev => ({
+  //     ...prev!,
+  //     comments: [newComment, ...(prev?.comments || [])],
+  //   }));
+  // };
+
+  const updateComments = (
+    newComment: IComment,
+    isAdd?: boolean,
+  ) => {
+    if (isAdd) {
+      setPost(prev => ({
+        ...prev!,
+        comments: [newComment, ...(prev?.comments || [])],
+      }));
+    } else {
+      setPost(prev => ({
+        ...prev!,
+        comments: prev?.comments?.filter(
+          comment => comment.id !== newComment.id
+        ),
+      }));
+    }
+  };
 
   const handleEditContent = () => {
     setEditContent({ title, content });
@@ -57,7 +81,6 @@ const ThreadPage = () => {
       handleError(error);
     }
   };
-
   const handleSaveContent = async () => {
     try {
       await updateThread(id as string, editContent);
@@ -93,8 +116,6 @@ const ThreadPage = () => {
       handleError(error);
     }
   };
-
-  console.log(post);
 
   return (
     <div className="">
@@ -141,14 +162,23 @@ const ThreadPage = () => {
             onLikeContent={handleLikeContent}
             isEditing={isEditing}
           />
-          {addComment && <NewCommentTextarea postId={id as string} />}
+          {addComment && (
+            <NewCommentTextarea
+              postId={id as string}
+              onAddComment={updateComments}
+            />
+          )}
         </CardFooter>
         <Separator className="h-1" />
         <div className="flex flex-col">
           <div className="text-start custom-heading">Comments</div>
           {comments &&
             comments.map(comment => (
-              <Comment key={comment.id} comment={comment} />
+              <Comment
+                key={comment.id + comment.createdAt}
+                comment={comment}
+                onUpdatedComment={updateComments}
+              />
             ))}
         </div>
       </Card>
