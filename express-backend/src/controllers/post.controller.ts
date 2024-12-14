@@ -15,9 +15,10 @@ class PostController {
   }
 
   async editPost(req: Request, res: Response) {
+    const { postId } = req.params;
     const { id } = res.locals.user;
     req.body.authorId = id;
-    const post = await postService.editPost(req.body);
+    const post = await postService.editPost(postId, req.body);
     res.json(post);
   }
 
@@ -36,7 +37,8 @@ class PostController {
   }
 
   async getPostsByAuthorId(req: Request, res: Response) {
-    const posts = await postService.getPosts(req.query);
+    const { authorId } = req.params;
+    const posts = await postService.getPosts({ ...req.query, authorId });
     res.json(posts);
   }
 }

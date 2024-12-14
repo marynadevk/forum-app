@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import commentService from '../services/comment.service';
 
 class CommentController {
-  getCommentTree(req: Request, res: Response) {
+  async getCommentTree(req: Request, res: Response) {
     const { rootId, limit } = req.query;
-    const comments = commentService.getCommentTree(rootId as string, +limit!);
+    const comments = await commentService.getCommentTree(rootId as string, +limit!);
     res.json(comments);
   }
 
@@ -16,9 +16,10 @@ class CommentController {
   }
 
   async editComment(req: Request, res: Response) {
+    const { commentId } = req.params;
     const { id } = res.locals.user;
     req.body.authorId = id;
-    const comment = await commentService.editComment(req.body);
+    const comment = await commentService.editComment(commentId, req.body);
     res.json(comment);
   }
 

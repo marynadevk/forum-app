@@ -3,6 +3,7 @@ import { CreatePostDto } from '../dtos/create-post.dto';
 import userService from './user.service';
 import { PaginatedPostsDTO } from '../dtos/paginated-posts.dto';
 import commentService from './comment.service';
+import { ObjectId } from 'mongodb';
 
 
 class PostService {
@@ -26,23 +27,24 @@ class PostService {
     return await post.save();
   }
 
-  async editPost(body: any) {
-    const { postId, authorId, ...updateData } = body;
+  async editPost(postId: string, body: any) {
+    const { authorId, ...updateData } = body;
     const author = await userService.getUserById(authorId);
     if (!author) {
       throw new Error('User not found');
     }
-
-    const existingPost = await Post.findOne({ id: postId });
+    const existingPost = await Post.findById(postId);
     if (!existingPost) {
       throw new Error('Post not found');
     }
-    if (existingPost.author !== author.id) {
+  
+    if (existingPost.author.toString() !== authorId) {
       throw new Error('You are not allowed to edit this post');
     }
-
-    return await Post.findByIdAndUpdate({ postId, ...updateData }, { new: true });
+  
+    return await Post.findByIdAndUpdate(postId, updateData, { new: true });
   }
+  
 
   async deletePost(id: string, userId: string) {
     const post = await Post.findById({ _id: id });
@@ -57,18 +59,21 @@ class PostService {
     return post;
   }
 
-  async getPosts({ page = 1, limit = 4 }: PaginatedPostsDTO) {
+  async getPosts({ page = 1, limit = 4, authorId }: PaginatedPostsDTO) {
     const offset = (page - 1) * limit;
-
-    const posts = await Post.find()
+    const filter: any = authorId ? { author: new ObjectId(authorId) } : {};
+    let totalPosts = 0;
+    const posts = await Post.find(filter)
       .sort({ createdAt: -1 })
       .skip(offset)
       .limit(limit);
-    if (!posts || posts.length === 0) {
+    if (!posts) {
       throw new Error(`Posts not found`);
     }
+    if (posts.length) {
+      totalPosts = await Post.countDocuments(filter);
+    }
 
-    const totalPosts = await Post.countDocuments();
     return {
       data: posts,
       total: totalPosts,

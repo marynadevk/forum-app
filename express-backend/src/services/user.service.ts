@@ -4,7 +4,7 @@ import User from '../models/user.schema';
 
 class UserService {
   async getUserById(id: string) {
-    const user = await User.findById({ _id: id  });
+    const user = await User.findById(id);
     if (!user) {
       throw new Error(`User's profile not found`);
     }
@@ -13,8 +13,8 @@ class UserService {
 
   async updateUser(id: string, body: UpdateUserDto) {
     if (body.username) {
-      const usernameExists = await authService.checkUsernameUnique(body.username);
-      if (usernameExists) {
+      const user = await authService.checkUsernameUnique(body.username);
+      if (user.username === body.username) {
         throw new Error(`Username already exists`);
       }
     }

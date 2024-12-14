@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { CreateCommentDto } from '../dtos/create-comment.dto';
 import Comment from '../models/comment.schema';
 import postService from './post.service';
@@ -72,58 +73,77 @@ class CommentService {
     const comments = await Comment.find({ post: postId })
       .sort({ createdAt: -1 })
       .limit(+limit!);
-  
+
     return await this.getCommentsWithAllData(comments);
   }
-  
 
   async getCommentTree(parentCommentId: string, limit = 10) {
     const comments = await Comment.aggregate([
-      { $match: { parentCommentId } },
+      {
+        $match: { parentComment: new ObjectId(parentCommentId) }
+      },
       {
         $lookup: {
           from: 'users',
-          localField: 'authorId',
+          localField: 'author',
           foreignField: '_id',
-          as: 'author',
-        },
+          as: 'author'
+        }
       },
       { $unwind: '$author' },
       {
-        $addFields: {
-          subCommentsCount: {
-            $size: {
-              $filter: {
-                input: '$subComments',
-                as: 'subComment',
-                cond: { $eq: ['$$subComment.parentCommentId', '$_id'] },
-              },
-            },
-          },
-        },
+        $lookup: {
+          from: 'comments',
+          localField: '_id',
+          foreignField: 'parentComment',
+          as: 'subComments'
+        }
       },
-      { $sort: { createdAt: 1 } },
+      {
+        $addFields: {
+          subCommentsCount: { $size: '$subComments' }
+        }
+      },
+      {
+        $sort: { createdAt: 1 }
+      },
       { $limit: limit },
+      {
+        $project: {
+          id: '$_id',
+          parentComment: 1,
+          content: 1,
+          createdAt: 1,
+          author: {
+            id: '$author._id',
+            username: '$author.username',
+            avatar: '$author.avatar'
+          },
+          subCommentsCount: 1
+        }
+      }
     ]);
 
-    return comments;
+    return comments || [];
   }
 
   async getCountOfSubComments(commentId: string) {
     return await Comment.countDocuments({ parentComment: commentId });
   }
 
-  async editComment(body: any) {
-    const { commentId, authorId, ...updateData } = body;
+  async editComment(commentId: string, body: any) {
+    const { authorId, ...updateData } = body;
     const author = await userService.getUserById(authorId);
     if (!author) {
       throw new Error('User not found');
     }
+
     const existingComment = await Comment.findOne({ _id: commentId });
     if (!existingComment) {
       throw new Error('Comment not found');
     }
-    if (existingComment.author !== authorId) {
+
+    if (existingComment.author.toString() !== authorId) {
       throw new Error('You are not allowed to edit this comment');
     }
     return await Comment.findByIdAndUpdate(commentId, updateData, { new: true });

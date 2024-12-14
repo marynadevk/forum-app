@@ -3,8 +3,8 @@ import profileService from '../services/profile.service';
 
 class ProfileController {
   async getUsersProfile(req: Request, res: Response) {
-    const { id } = res.locals.user;
-    if (id !== req.params.id) {
+    const { id } = req.params;
+    if (!res.locals.user.id.length) {
       throw new Error('Please login to view this profile');
     }
     const profile = await profileService.getUsersProfile(id);
@@ -18,7 +18,7 @@ class ProfileController {
         'You are not allowed to update this profile',
       );
     }
-    const profile = profileService.updateProfile(id, req.body);
+    const profile = await profileService.updateProfile(req.params.id, req.body);
     res.json(profile);
   }
 
@@ -29,7 +29,7 @@ class ProfileController {
         'You are not allowed to delete this profile',
       );
     }
-    const profile = profileService.deleteProfile(id, req.body.password);
+    const profile = await profileService.deleteProfile(req.params.id, req.body.password);
     res.json({
       message: 'Profile deleted successfully',
       profile,

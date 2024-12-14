@@ -27,6 +27,9 @@ class ProfileService {
 
   async updateProfile(userId: string, body: UpdateUserDto) {
     const user = await userService.updateUser(userId, body);
+    if (!user) {
+      throw new Error(`User's profile not found`);
+    }
 
     return {
       id: user.id,
