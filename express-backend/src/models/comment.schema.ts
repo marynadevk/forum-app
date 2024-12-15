@@ -17,6 +17,8 @@ const CommentSchema = new Schema<IComment>(
   },
 );
 
-CommentSchema.virtual('id', { id: this._id });
+CommentSchema.virtual('id').get(function () {
+  return this._id.toHexString()
+});
 const Comment = mongoose.model<IComment>('Comment', CommentSchema);
 export default Comment;

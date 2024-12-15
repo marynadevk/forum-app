@@ -22,6 +22,18 @@ class PostController {
     res.json(post);
   }
 
+  async likePost(req: Request, res: Response) {
+    const { id } = res.locals.user;
+    const post = await postService.likePost(req.params.postId, id);
+    res.json(post);
+  }
+
+  async unlikePost(req: Request, res: Response) {
+    const { id } = res.locals.user;
+    const post = await postService.unlikePost(req.params.postId, id);
+    res.json(post);
+  }
+
   async deletePost(req: Request, res: Response) {
     const { id } = res.locals.user;
     const post = await postService.deletePost(req.params.postId, id);

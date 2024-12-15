@@ -17,6 +17,8 @@ const PostSchema = new Schema<IPost>(
   }
 );
 
-PostSchema.virtual('id', { id: this._id });
+PostSchema.virtual('id').get(function () {
+  return this._id.toHexString()
+});
 const Post = mongoose.model<IPost>('Post', PostSchema);
 export default Post;

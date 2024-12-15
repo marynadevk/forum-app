@@ -26,3 +26,13 @@ export interface IComment extends Document {
   createdAt: Date;
   likes: Types.ObjectId[];
 }
+export interface INotification {
+  id: string;
+  userId: Types.ObjectId;
+  type: 'like' | 'comment';
+  contentId: Types.ObjectId;
+  initiator: Types.ObjectId | IUser;
+  message: string;
+  createdAt: Date;
+  isRead: boolean;
+}

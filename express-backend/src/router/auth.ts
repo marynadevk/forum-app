@@ -9,6 +9,5 @@ authRouter.post('/v1/auth/signup', AuthController.signup);
 authRouter.post('/v1/auth/login', AuthController.login);
 authRouter.get('/v1/auth/check-username', AuthController.checkUsernameUnique);
 authRouter.get('/v1/auth/me', authMiddleware, AuthController.getMe);
-// router.post('/v1/auth/logout', authController.logout);
 
 export default authRouter;

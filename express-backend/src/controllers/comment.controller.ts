@@ -31,6 +31,19 @@ class CommentController {
       comment,
     });
   }
+
+  async likeComment(req: Request, res: Response) {
+    const { id } = res.locals.user;
+    const comment = await commentService.likeComment(req.params.commentId, id);
+    res.json(comment);
+  }
+
+  async unlikeComment(req: Request, res: Response) {
+    const { id } = res.locals.user;
+    const comment = await commentService.unlikeComment(req.params.commentId, id);
+    res.json(comment);
+  }
+  
 }
 
 export default new CommentController();

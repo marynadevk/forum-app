@@ -1,9 +1,11 @@
 import Post from '../models/post.schema';
+import Notification from '../models/notification.schema';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import userService from './user.service';
 import { PaginatedPostsDTO } from '../dtos/paginated-posts.dto';
 import commentService from './comment.service';
 import { ObjectId } from 'mongodb';
+import notificationService from './notification.service';
 
 
 class PostService {
@@ -80,6 +82,35 @@ class PostService {
       page,
       limit,
     };
+  }
+
+  async likePost(postId: string, userId: string) {
+    const post = await Post.findById(postId);
+    if (!post) {
+      throw new Error('Post not found');
+    }
+
+    if (post.author.toString() !== userId.toString()) {
+      notificationService.createNotification({
+        userId: post.author,
+        type: 'like',
+        contentId: postId,
+        initiator: userId,
+        message: `User ${userId} liked your post.`,
+      });
+    }
+
+    post.likes.push(new ObjectId(userId));
+    return await post.save();
+  }
+
+  async unlikePost(postId: string, userId: string) {
+    const post = await Post.findById(postId);
+    if (!post) {
+      throw new Error('Post not found');
+    }
+    post.likes = post.likes.filter((like) => like.toString() !== userId);
+    return await post.save();
   }
 }
 

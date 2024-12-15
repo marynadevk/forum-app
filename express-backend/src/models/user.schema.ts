@@ -15,6 +15,8 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-UserSchema.virtual('id', { id: this._id });
+UserSchema.virtual('id').get(function () {
+  return this._id.toHexString()
+});
 const User = mongoose.model<IUser>('User', UserSchema);
 export default User;

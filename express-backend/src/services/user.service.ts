@@ -14,7 +14,7 @@ class UserService {
   async updateUser(id: string, body: UpdateUserDto) {
     if (body.username) {
       const user = await authService.checkUsernameUnique(body.username);
-      if (user.username === body.username) {
+      if (user) {
         throw new Error(`Username already exists`);
       }
     }

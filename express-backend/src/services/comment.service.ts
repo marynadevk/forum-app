@@ -1,8 +1,10 @@
 import { ObjectId } from 'mongodb';
 import { CreateCommentDto } from '../dtos/create-comment.dto';
 import Comment from '../models/comment.schema';
+import Notification from '../models/notification.schema';
 import postService from './post.service';
 import userService from './user.service';
+import notificationService from './notification.service';
 
 class CommentService {
   async getCommentsWithAllData(comments: any[]) {
@@ -41,6 +43,16 @@ class CommentService {
         throw new Error('Post not found');
       }
       newComment.post = post._id;
+      if (post.author.toString() !== data.authorId.toString()) {
+        notificationService.createNotification({
+          userId: post.author,
+          type: 'comment',
+          contentId: post._id,
+          initiator: data.authorId,
+          message: `User ${data.authorId} commented on your post.`,
+        });
+      }
+
     } else if (data.commentId) {
       const parentComment = await this.getCommentById(data.commentId);
       if (!parentComment) {
@@ -160,6 +172,34 @@ class CommentService {
     await comment.deleteOne();
 
     return comment;
+  }
+
+  async likeComment(commentId: string, userId: string) {
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+    if (comment.author.toString() !== userId.toString()) {
+      notificationService.createNotification({
+        userId: comment.author,
+        type: 'like',
+        contentId: commentId,
+        initiator: userId,
+        message: `User ${userId} liked your comment.`,
+      });
+    }
+
+    comment.likes.push(new ObjectId(userId));
+    return await comment.save();
+  }
+
+  async unlikeComment(commentId: string, userId: string) {
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+    comment.likes = comment.likes.filter((like) => like.toString() !== userId);
+    return await comment.save();
   }
 }
 
