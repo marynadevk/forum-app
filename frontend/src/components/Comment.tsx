@@ -31,7 +31,7 @@ const Comment = ({ comment, level = 0, onUpdatedComment }: Props) => {
   const [addComment, setAddComment] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [subComments, setSubComments] = useState<IComment[] | null>(null);
-  const [editContent, setEditContent] = useState({ content: '' });
+  const [editContent, setEditContent] = useState({ title: '', content: '' });
   const [likes, setLikes] = useState<string[]>(comment.likes || []);
 
   const { user } = useUserStore();
@@ -49,7 +49,7 @@ const Comment = ({ comment, level = 0, onUpdatedComment }: Props) => {
   };
 
   const handleEditContent = () => {
-    setEditContent({ content });
+    setEditContent({ title: '', content });
     setIsEditing(!isEditing);
   };
 
@@ -69,7 +69,7 @@ const Comment = ({ comment, level = 0, onUpdatedComment }: Props) => {
     try {
       await updateComment(id as string, editContent);
       setIsEditing(false);
-      setEditContent({ content: '' });
+      setEditContent({ title: '', content: '' });
     } catch (error) {
       handleError(error);
     }

@@ -130,7 +130,7 @@ const ThreadPage = () => {
               {isEditing ? (
                 <EditContent
                   editContent={editContent}
-                  setEditContent={setEditContent}
+                  setEditContent={setEditContent} 
                   onSave={handleSaveContent}
                 />
               ) : (

@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 type Props = {
   editContent: { title?: string; content: string };
   setEditContent: React.Dispatch<
-    React.SetStateAction<{ title?: string; content: string }>
+    React.SetStateAction<{ title: string; content: string }>
   >;
   onSave: () => void;
 };
