@@ -6,4 +6,5 @@ export const envConfig = {
   dbUrl: process.env.DB_URL as string,
   jwtSecret: process.env.JWT_SECRET as string,
   jwtExpire: process.env.JWT_EXPIRE || '3h',
+  corsOrigin: process.env.CORS_ORIGIN as string,
 }

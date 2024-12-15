@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import notificationService from '../services/notification.service';
-import userService from '../services/user.service';
 
 class NotificationController {
   async getNotifications(_req: Request, res: Response) {

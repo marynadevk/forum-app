@@ -11,7 +11,7 @@ import notificationRouter from './router/notification';
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: envConfig.corsOrigin,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));

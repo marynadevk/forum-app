@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { CreateCommentDto } from '../dtos/create-comment.dto';
 import Comment from '../models/comment.schema';
-import Notification from '../models/notification.schema';
 import postService from './post.service';
 import userService from './user.service';
 import notificationService from './notification.service';

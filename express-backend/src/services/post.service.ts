@@ -1,5 +1,4 @@
 import Post from '../models/post.schema';
-import Notification from '../models/notification.schema';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import userService from './user.service';
 import { PaginatedPostsDTO } from '../dtos/paginated-posts.dto';
