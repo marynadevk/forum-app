@@ -8,7 +8,7 @@ export interface IFormField {
 export interface IUser {
   id: string;
   username: string;
-  email: string;
+  email?: string;
   avatar: string;
 }
 
@@ -40,4 +40,13 @@ export interface IComment {
   likes?: string[];
   subComments?: IComment[];
   subCommentsCount?: number;
+}
+
+export interface INotification {
+  id: string;
+  contentId: string;
+  isRead: boolean;
+  createdAt: string;
+  type: 'like' | 'comment';
+  initiator: { id: string; username: string; avatar: string };
 }

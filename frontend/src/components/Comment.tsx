@@ -39,7 +39,6 @@ const Comment = ({ comment, level = 0, onUpdatedComment }: Props) => {
   const { id, author, authorId, content, createdAt, subCommentsCount } =
     comment;
 
-
   const loadSubComments = async () => {
     try {
       const subComments = await getCommentsTree(id, '4');
@@ -61,7 +60,6 @@ const Comment = ({ comment, level = 0, onUpdatedComment }: Props) => {
         onUpdatedComment(comment, false);
       }
       toast.success(result.message);
-
     } catch (error) {
       handleError(error);
     }
@@ -79,6 +77,10 @@ const Comment = ({ comment, level = 0, onUpdatedComment }: Props) => {
 
   const handleLikeContent = async () => {
     try {
+      if (user?.id === author.id) {
+        toast.warning('You cannot like your own content.');
+        return;
+      }
       if (likes && user) {
         const isLiked = likes.includes(user?.id);
         if (isLiked) {

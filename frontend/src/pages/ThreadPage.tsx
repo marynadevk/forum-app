@@ -40,17 +40,7 @@ const ThreadPage = () => {
   if (!post) return <div>Post not found</div>;
   const { title, content, author, image, createdAt, likes, comments } = post;
 
-  // const handleAddComment = (newComment: IComment) => {
-  //   setPost(prev => ({
-  //     ...prev!,
-  //     comments: [newComment, ...(prev?.comments || [])],
-  //   }));
-  // };
-
-  const updateComments = (
-    newComment: IComment,
-    isAdd?: boolean,
-  ) => {
+  const updateComments = (newComment: IComment, isAdd?: boolean) => {
     if (isAdd) {
       setPost(prev => ({
         ...prev!,
@@ -94,8 +84,13 @@ const ThreadPage = () => {
       handleError(error);
     }
   };
+
   const handleLikeContent = async () => {
     try {
+      if (user?.id === post.author.id) {
+        toast.warning('You cannot like your own content.');
+        return;
+      }
       if (post.likes && user) {
         const isLiked = post?.likes.includes(user?.id);
         if (isLiked) {
