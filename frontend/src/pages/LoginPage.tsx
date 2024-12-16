@@ -40,7 +40,7 @@ const LoginPage = () => {
   const { setUser } = useUserStore();
   const navigate = useNavigate();
   const { setToken, removeToken } = useTokenStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const defaultValues = {
     email: '',
     password: '',
@@ -52,6 +52,7 @@ const LoginPage = () => {
   const handleSubmit = async (values: z.infer<typeof loginFormSchema>) => {
     const { email, password } = values;
     try {
+      setIsLoading(true);
       const response = await login(email, password);
       form.reset(defaultValues);
       setToken(response.access_token);

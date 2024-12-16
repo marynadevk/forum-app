@@ -53,7 +53,7 @@ const SignupPage = () => {
   ];
   const { setUser } = useUserStore();
   const { setToken, removeToken } = useTokenStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const defaultValues = {
     username: '',
@@ -73,6 +73,7 @@ const SignupPage = () => {
     const randomAvatarNumber = Math.floor(Math.random() * 10) + 1;
     const avatar = `/images/avatars/avatar${randomAvatarNumber}.svg`;
     try {
+      setIsLoading(true);
       const response = await signup(username, email, password, avatar);
       setToken(response.access_token);
       form.reset(defaultValues);
@@ -88,7 +89,8 @@ const SignupPage = () => {
   };
 
   const checkUsername = async () => {
-    const username = form.getValues('username').trim();
+    try {
+      const username = form.getValues('username').trim();
     if (!username) {
       form.setError('username', {
         type: 'manual',
@@ -107,6 +109,12 @@ const SignupPage = () => {
     } else {
       form.clearErrors('username');
       toast.success(NAME_MSGS.available);
+    }
+      
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -144,7 +152,7 @@ const SignupPage = () => {
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
             <Button onClick={checkUsername} className="w-full" type="button">
-              Check username availability
+            {isLoading ? <Loader size="sm" className="mr-2" /> : 'Check username availability'}
             </Button>
             <Button className="w-full" type="submit">
               {isLoading ? <Loader size="sm" className="mr-2" /> : 'Register'}
