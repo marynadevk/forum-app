@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { NAME_MSGS } from 'src/constants/constants';
 import { handleError } from 'src/helpers/errorHandler';
+import useTokenStore from 'src/store/token.store';
 import { z } from 'zod';
 import { signupFormSchema } from '@schemas/signupFormSchema';
 import { Button } from '@ui/button';
@@ -16,11 +18,11 @@ import {
   FormMessage,
 } from '@ui/form';
 import { Input } from '@ui/input';
+import { Loader, PageLoader } from '@components/index';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signup, checkUsernameUnique } from '../api/';
 import { IFormField } from '../interfaces';
 import useUserStore from '../store/authorized-user.store';
-import useTokenStore from 'src/store/token.store';
 
 const SignupPage = () => {
   const FORM_FIELDS: IFormField[] = [
@@ -51,6 +53,8 @@ const SignupPage = () => {
   ];
   const { setUser } = useUserStore();
   const { setToken, removeToken } = useTokenStore();
+  const [isLoading, setIsLoading] = useState(true);
+
   const defaultValues = {
     username: '',
     email: '',
@@ -70,7 +74,7 @@ const SignupPage = () => {
     const avatar = `/images/avatars/avatar${randomAvatarNumber}.svg`;
     try {
       const response = await signup(username, email, password, avatar);
-      setToken( response.access_token);
+      setToken(response.access_token);
       form.reset(defaultValues);
       toast.success('Profile created successfully, enjoy!');
       navigate('/threads');
@@ -103,6 +107,8 @@ const SignupPage = () => {
       toast.success(NAME_MSGS.available);
     }
   };
+
+  if (isLoading) return <PageLoader />;
 
   return (
     <Form {...form}>
@@ -141,7 +147,7 @@ const SignupPage = () => {
               Check username availability
             </Button>
             <Button className="w-full" type="submit">
-              Register
+              {isLoading ? <Loader size="sm" className="mr-2" /> : 'Register'}
             </Button>
             <Link
               className="hover:text-fuchsia-700 hover:underline"

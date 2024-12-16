@@ -31,7 +31,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@ui/sheet';
-import { SelectAvatar } from '@components/index';
+import { PageLoader, SelectAvatar } from '@components/index';
 import NotFoundPage from './NotFoundPage';
 
 const ProfilePage = () => {
@@ -40,6 +40,7 @@ const ProfilePage = () => {
   const { user, setUser } = useUserStore();
   const [profile, setProfile] = useState<IUserProfile | null>(null);
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [isSheetOpen, setSheetOpen] = useState(false);
   const postCount = profile?.posts || 0;
   const { removeToken } = useTokenStore();
@@ -66,14 +67,16 @@ const ProfilePage = () => {
         setProfile(profileData);
       } catch (error) {
         handleError(error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUserProfile();
   }, [id]);
 
-  if (!user) return <NotFoundPage text='Please log in to view the profile page' />;
-
+  if (!user)
+    return <NotFoundPage text="Please log in to view the profile page" />;
 
   const handleSaveChanges = async () => {
     if (!id) return;
@@ -102,6 +105,8 @@ const ProfilePage = () => {
     } catch (error) {
       handleError(error);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,6 +141,7 @@ const ProfilePage = () => {
     }
   };
 
+  if (isLoading) return <PageLoader />;
   const noPostsText = `${profile?.username} hasn't posted anything yet.`;
 
   return (
@@ -143,6 +149,7 @@ const ProfilePage = () => {
       <CardHeader>
         <div className="custom-heading">Profile</div>
       </CardHeader>
+
       <CardContent>
         <div className="flex items-center gap-5">
           Avatar:
@@ -151,7 +158,6 @@ const ProfilePage = () => {
           </Avatar>
         </div>
         <span>Username: {profile?.username}</span>
-        {/* {postCount === 0 ? ( */}
         <Button
           className="w-max"
           onClick={() =>
@@ -162,11 +168,6 @@ const ProfilePage = () => {
         >
           <span>Posts: {postCount}</span>
         </Button>
-        {/* ) : (
-          <Link to={`/profile/${id}/threads`} className="hover:underline">
-            <span>Posts: {postCount}</span>
-          </Link>
-        )} */}
         <span>Reactions on their posts: {profile?.impressions}</span>
       </CardContent>
       {isMyProfile && (

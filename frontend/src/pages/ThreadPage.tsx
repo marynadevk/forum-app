@@ -20,6 +20,7 @@ import {
   TimeAgo,
   NewCommentTextarea,
   UserLink,
+  PageLoader,
 } from '@components/index';
 import { IComment, IPost, IUser } from '../interfaces';
 
@@ -31,10 +32,17 @@ const ThreadPage = () => {
   const [editContent, setEditContent] = useState({ title: '', content: '' });
   const navigate = useNavigate();
   const { user } = useUserStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
-    getThread(id).then(setPost);
+    try {
+      if (!id) return;
+      getThread(id).then(setPost);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [id]);
 
   if (!post) return <div>Post not found</div>;
@@ -112,6 +120,8 @@ const ThreadPage = () => {
     }
   };
 
+  if (isLoading) return <PageLoader />;
+
   return (
     <div className="">
       <Card className="w-full">
@@ -130,7 +140,7 @@ const ThreadPage = () => {
               {isEditing ? (
                 <EditContent
                   editContent={editContent}
-                  setEditContent={setEditContent} 
+                  setEditContent={setEditContent}
                   onSave={handleSaveContent}
                 />
               ) : (

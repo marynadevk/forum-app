@@ -12,3 +12,5 @@ export { default as SelectAvatar } from './SelectAvatar.tsx';
 export { default as UploadImgBtn } from './UploadImgBtn.tsx';
 export { default as TimeAgo } from './TimeAgo.tsx';
 export { default as UserLink } from './UserLink.tsx';
+export { default as PageLoader } from './PageLoader.tsx';
+export { default as Loader } from './Loader.tsx';

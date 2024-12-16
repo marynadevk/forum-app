@@ -17,7 +17,7 @@ import { toast } from 'react-toastify';
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState<INotification[]>([]);
   const { user, setNotificationsCount } = useUserStore();
-
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -28,6 +28,8 @@ const NotificationsPage = () => {
         setNotifications(data);
       } catch (error) {
         handleError(error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -46,6 +48,8 @@ const NotificationsPage = () => {
       console.error('Error marking notification as read:', error);
     }
   };
+
+  
 
   return (
     <div className="p-4 space-y-4 w-full">

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { login } from 'src/api';
@@ -17,6 +18,8 @@ import {
   FormMessage,
 } from '@ui/form';
 import { Input } from '@ui/input';
+import Loader from '@components/Loader';
+import { PageLoader } from '@components/index';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IFormField } from '../interfaces';
 
@@ -38,6 +41,7 @@ const LoginPage = () => {
   const { setUser } = useUserStore();
   const navigate = useNavigate();
   const { setToken, removeToken } = useTokenStore();
+  const [isLoading, setIsLoading] = useState(true);
   const defaultValues = {
     email: '',
     password: '',
@@ -57,8 +61,12 @@ const LoginPage = () => {
       handleError(error);
       setUser(null);
       removeToken();
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) return <PageLoader />;
 
   return (
     <Form {...form}>
@@ -100,7 +108,7 @@ const LoginPage = () => {
               Don't have an account? Sign up
             </Link>
             <Button className="w-full" type="submit">
-              Ok
+              {isLoading ? <Loader size="sm" className="mr-2" /> : 'Ok'}
             </Button>
           </CardFooter>
         </Card>

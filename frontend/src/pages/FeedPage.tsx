@@ -4,7 +4,7 @@ import { getThreads, getUserProfile, getUsersThreads } from 'src/api';
 import { POSTS_PER_PAGE } from 'src/constants/constants';
 import { handleError } from 'src/helpers/errorHandler';
 import { Button } from '@ui/button';
-import { ThreadsList, NewPostTextarea } from '@components/index';
+import { ThreadsList, NewPostTextarea, PageLoader } from '@components/index';
 import { IPost, IUser } from '../interfaces';
 import useUserStore from '../store/authorized-user.store';
 
@@ -17,6 +17,7 @@ const FeedPage = () => {
   const [authorOfPosts, setAuthorOfPosts] = useState<IUser | null>(null);
   const [page, setPage] = useState(1);
   const [totalPosts, setTotalPosts] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchInitialPosts = async () => {
@@ -38,6 +39,8 @@ const FeedPage = () => {
         setPage(2);
       } catch (error) {
         handleError(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchInitialPosts();
@@ -54,6 +57,8 @@ const FeedPage = () => {
       handleError(error);
     }
   };
+
+  if (isLoading) return <PageLoader />;
 
   return (
     <div className="flex flex-col gap-10">
