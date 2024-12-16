@@ -82,6 +82,8 @@ const SignupPage = () => {
       handleError(error);
       removeToken();
       setUser(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 

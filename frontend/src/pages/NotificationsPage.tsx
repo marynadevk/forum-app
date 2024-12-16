@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   countUnreadNotifications,
   getNotifications,
@@ -8,11 +9,11 @@ import {
 import { handleError } from 'src/helpers/errorHandler';
 import { INotification } from 'src/interfaces';
 import useUserStore from 'src/store/authorized-user.store';
+import PageLoader from '@components/PageLoader';
 import TimeAgo from '@components/TimeAgo';
 import UserLink from '@components/UserLink';
 import { Button } from '@components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
-import { toast } from 'react-toastify';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState<INotification[]>([]);
@@ -49,7 +50,7 @@ const NotificationsPage = () => {
     }
   };
 
-  
+  if (isLoading) return <PageLoader />;
 
   return (
     <div className="p-4 space-y-4 w-full">
@@ -75,7 +76,10 @@ const NotificationsPage = () => {
             </CardHeader>
             <CardContent>
               <div className="flex justify-between">
-                <Link to={`/threads/${notification.contentId}`} className='hover:text-pink-500'>
+                <Link
+                  to={`/threads/${notification.contentId}`}
+                  className="hover:text-pink-500"
+                >
                   See the post
                 </Link>
                 {!notification.isRead && (
