@@ -66,8 +66,6 @@ const LoginPage = () => {
     }
   };
 
-  if (isLoading) return <PageLoader />;
-
   return (
     <Form {...form}>
       <form

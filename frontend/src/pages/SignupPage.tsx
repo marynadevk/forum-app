@@ -110,8 +110,6 @@ const SignupPage = () => {
     }
   };
 
-  if (isLoading) return <PageLoader />;
-
   return (
     <Form {...form}>
       <form
