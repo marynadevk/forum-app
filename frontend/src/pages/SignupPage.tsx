@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from '@ui/form';
 import { Input } from '@ui/input';
-import { Loader, PageLoader } from '@components/index';
+import { Loader } from '@components/index';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signup, checkUsernameUnique } from '../api/';
 import { IFormField } from '../interfaces';

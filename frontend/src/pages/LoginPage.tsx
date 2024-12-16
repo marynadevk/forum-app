@@ -19,7 +19,6 @@ import {
 } from '@ui/form';
 import { Input } from '@ui/input';
 import Loader from '@components/Loader';
-import { PageLoader } from '@components/index';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { IFormField } from '../interfaces';
 
